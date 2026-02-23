@@ -1596,120 +1596,100 @@ const CONFIG = {
   CONFIRM_DELETE: 'Видалити?'
 };
 
-/* --- ДАНІ З РЕЦЕПТАМИ ТА ЛОГІКА РОЗРАХУНКУ --- */
-const RECIPES_DATA = {
-  ingots: {
-    "Злиток заліза": {"Вугілля":5,"Залізна руда":10,"Форма з глини":1},
-    "Злиток золота": {"Вугілля":5,"Золота руда":10,"Форма з глини":1},
-    "Злиток латуні": {"Вугілля":5,"Злиток міді":1,"Злиток цинку":1,"Форма з глини":1},
-    "Злиток міді": {"Вугілля":5,"Мідна руда":10,"Форма з глини":1},
-    "Злиток свинцю": {"Вугілля":5,"Свинцева руда":10,"Форма з глини":1},
-    "Злиток Срібла": {"Вугілля":5,"Срібна руда":10,"Форма з глини":1},
-    "Злиток сталі": {"Вугілля":5,"Злиток заліза":1,"Форма з глини":1},
-    "Злиток цинку": {"Вугілля":5,"Цинкова руда":1,"Форма з глини":1},
-    "Форма з глини": {"Вугілля":5,"Глина":5}
-  },
-  parts: {
-    "Барабан": {"Злиток сталі":1},
-    "Дуло": {"Злиток сталі":1},
-    "Пружина 10шт": {"Злиток заліза":1},
-    "Шуруп 20шт": {"Злиток заліза":1},
-    "Пружина": {"Злиток заліза": 0.1}, 
-    "Шуруп": {"Злиток заліза": 0.05}, 
-    "Корпус важкої зброї": {"Злиток заліза":2,"Злиток сталі":2,"Дерево":10,"Шуруп":10},
-    "Корпус легкої зброї": {"Злиток заліза":1,"Злиток сталі":1,"Дерево":5,"Шуруп":5}
-  },
-  recipes: [
-    {id:1,name:"Ремонтний набір",cat:"Інструменти",resources:{"Злиток заліза":1,"Тканина":5,"Дерево":1,"Шуруп":5,"Пружина":2}},
-    {id:2,name:"Гвинтівка Boltaction",cat:"Гвинтівка",resources:{"Корпус важкої зброї":1,"Дуло":1,"Дерево":25,"Шуруп":10,"Пружина":3,"Злиток сталі":4}},
-    {id:3,name:"Гвинтівка Springfield",cat:"Гвинтівка",resources:{"Корпус важкої зброї":1,"Дуло":1,"Дерево":20,"Шуруп":10,"Пружина":3,"Злиток сталі":4}},
-    {id:4,name:"Дробовик Double Barrel",cat:"Дробовик",resources:{"Корпус важкої зброї":1,"Дуло":2,"Дерево":5,"Шуруп":20,"Пружина":2,"Злиток сталі":3}},
-    {id:5,name:"Дробовик Repeating",cat:"Дробовик",resources:{"Корпус важкої зброї":1,"Дуло":1,"Дерево":5,"Шуруп":15,"Пружина":2,"Злиток сталі":2}},
-    {id:6,name:"Дробовик Semi-Auto",cat:"Дробовик",resources:{"Корпус важкої зброї":1,"Дуло":1,"Дерево":5,"Шуруп":15,"Пружина":2,"Злиток сталі":2,"Злиток Срібла":2,"Злиток золота":2}},
-    {id:7,name:"Револьвер Cattleman",cat:"Револьвер",resources:{"Корпус легкої зброї":1,"Дуло":1,"Барабан":1,"Дерево":1,"Шуруп":10,"Пружина":3,"Злиток сталі":2}},
-    {id:8,name:"Револьвер Double Action",cat:"Револьвер",resources:{"Корпус легкої зброї":1,"Дуло":1,"Барабан":1,"Дерево":1,"Шуруп":10,"Пружина":3,"Злиток сталі":2}},
-    {id:9,name:"Револьвер Double Action Gambler",cat:"Револьвер",resources:{"Корпус легкої зброї":1,"Дуло":1,"Барабан":1,"Дерево":1,"Шуруп":10,"Пружина":3,"Злиток сталі":2}},
-    {id:10,name:"Револьвер Lemat",cat:"Револьвер",resources:{"Корпус легкої зброї":1,"Дуло":2,"Барабан":1,"Дерево":1,"Шуруп":10,"Пружина":4,"Злиток сталі":2}},
-    {id:11,name:"Револьвер Navy",cat:"Револьвер",resources:{"Корпус легкої зброї":1,"Дуло":1,"Барабан":1,"Дерево":1,"Шуруп":10,"Пружина":3,"Злиток сталі":3,"Злиток золота":1,"Злиток Срібла":1}},
-    {id:12,name:"Револьвер Schofield",cat:"Револьвер",resources:{"Корпус легкої зброї":1,"Дуло":1,"Барабан":1,"Дерево":1,"Шуруп":10,"Пружина":3,"Злиток сталі":2}},
-    {id:13,name:"Ріпітер Carbine",cat:"Ріпітер",resources:{"Корпус важкої зброї":1,"Дуло":1,"Дерево":5,"Шуруп":15,"Пружина":4,"Злиток сталі":3}},
-    {id:14,name:"Ріпітер Evans",cat:"Ріпітер",resources:{"Корпус важкої зброї":1,"Дуло":1,"Дерево":10,"Шуруп":15,"Пружина":4,"Злиток сталі":3}},
-    {id:15,name:"Ріпітер Lancaster",cat:"Ріпітер",resources:{"Корпус важкої зброї":1,"Дуло":2,"Дерево":5,"Шуруп":15,"Пружина":4,"Злиток сталі":3}},
-    {id:16,name:"Ріпітер Lichfield",cat:"Ріпітер",resources:{"Корпус важкої зброї":1,"Дуло":2,"Дерево":5,"Шуруп":15,"Пружина":4,"Злиток сталі":3}}
-  ]
-};
+/* --- ДАНІ ЗАВАНТАЖУЮТЬСЯ З API --- */
+// RECIPES_DATA завантажується з сервера через API
 
-// --- ОНОВЛЕНІ ЦІНИ НА БАЗОВІ РЕСУРСИ (Собівартість) ---
-const COST_PRICES = {
-    // Вхідні дані користувача
-    "Злиток золота": 200,
-    "Злиток Срібла": 200,
-    "Злиток латуні": 65,
-    "Злиток сталі": 35,
-    "Злиток заліза": 25,
-    "Злиток міді": 25,
-    "Злиток цинку": 25,
-    "Злиток свинцю": 25,
-    "Вугілля": 1.5,
-    "Дерево": 0,
-    "Глина": 0,
-    "Тканина": 0, 
-
-    // Всі руди не рахуємо (ціна 0)
-    "Залізна руда": 0, "Золота руда": 0, "Мідна руда": 0, 
-    "Свинцева руда": 0, "Срібна руда": 0, "Цинкова руда": 0,
-    
-    // Собівартість Форми: 5 Вугілля + 5 Глина = 5 * $1 + 0 = $5.
-    "Форма з глини": 5, 
-};
+// --- ЦІНИ ЗАВАНТАЖУЮТЬСЯ З API ---
+const COST_PRICES = {}; // Заповняється з сервера
 
 
 let DB;
 let ENCRYPTION_PASSWORD = null;
 
-async function loadDatabase() {
-  try {
-    const encrypted = localStorage.getItem(CONFIG.STORAGE_KEY);
-    if (encrypted && ENCRYPTION_PASSWORD) {
-      const decrypted = await StorageEncryption.decrypt(encrypted, ENCRYPTION_PASSWORD);
-      if (decrypted && typeof decrypted === 'object') {
-        DB = decrypted;
-      } else {
-        console.warn('Не вдалось розшифрувати БД, використовую дані за умовленням');
-        DB = RECIPES_DATA;
-        // Очистити пошкоджені дані
-        localStorage.removeItem(CONFIG.STORAGE_KEY);
-      }
-    } else {
-      // Якщо немає зашифрованих даних, використовуємо за умовленням
-      DB = RECIPES_DATA;
-    }
-  } catch (e) {
-    console.error('Критична помилка при завантаженні БД:', e);
-    DB = RECIPES_DATA;
-    // Очистити пошкоджені дані
-    localStorage.removeItem(CONFIG.STORAGE_KEY);
-  }
-}
+/* --- API CLIENT --- */
+const apiClient = {
+  baseURL: AUTH_CONFIG.API_URL,
+  token: null,
 
-async function saveDatabase() {
-  try {
-    if (ENCRYPTION_PASSWORD) {
-      if (!DB || typeof DB !== 'object') {
-        console.error('Невалідні дані БД для збереження');
-        return;
+  async init() {
+    // Завантажити токен з localStorage якщо він є
+    this.token = localStorage.getItem(AUTH_CONFIG.STORAGE_TOKEN_KEY);
+  },
+
+  async authenticate(password) {
+    try {
+      const response = await fetch(`${this.baseURL}/api/auth`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+
+      if (!response.ok) {
+        throw new Error('Невірний пароль');
       }
-      const encrypted = await StorageEncryption.encrypt(DB, ENCRYPTION_PASSWORD);
-      if (encrypted) {
-        localStorage.setItem(CONFIG.STORAGE_KEY, encrypted);
-      } else {
-        console.error('Не вдалось зашифрувати БД');
-      }
+
+      const data = await response.json();
+      this.token = data.token;
+      localStorage.setItem(AUTH_CONFIG.STORAGE_TOKEN_KEY, this.token);
+      return { success: true, token: this.token };
+    } catch (error) {
+      console.error('Помилка аутентифікації:', error);
+      return { success: false, error: error.message };
     }
-  } catch (e) {
-    console.error('Критична помилка при збереженні БД:', e);
+  },
+
+  async getRecipes() {
+    try {
+      if (!this.token) {
+        throw new Error('Не авторизовано');
+      }
+
+      const response = await fetch(`${this.baseURL}/api/recipes`, {
+        headers: { 'Authorization': `Bearer ${this.token}` }
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem(AUTH_CONFIG.STORAGE_TOKEN_KEY);
+          this.token = null;
+          throw new Error('Сесія закінчилась');
+        }
+        throw new Error('Помилка завантаження рецептів');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Помилка при отриманні рецептів:', error);
+      return null;
+    }
+  },
+
+  async getPrices() {
+    try {
+      if (!this.token) {
+        throw new Error('Не авторизовано');
+      }
+
+      const response = await fetch(`${this.baseURL}/api/prices`, {
+        headers: { 'Authorization': `Bearer ${this.token}` }
+      });
+
+      if (!response.ok) {
+        throw new Error('Помилка завантаження цін');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Помилка при отриманні цін:', error);
+      return {};
+    }
+  },
+
+  logout() {
+    this.token = null;
+    localStorage.removeItem(AUTH_CONFIG.STORAGE_TOKEN_KEY);
   }
-}
+};
 let ACTIVE_ID = null;
 let DEBOUNCE_TIMER = null;
 let HISTORY = []; // Для undo/redo
@@ -1717,10 +1697,11 @@ let HISTORY_INDEX = -1;
 
 // --- AUTHENTICATION CONFIG ---
 const AUTH_CONFIG = {
-  DEFAULT_PASSWORD: 'castellllo',
+  API_URL: 'https://castello-guns-api.onrender.com',
   STORAGE_PASSWORD_HASH_KEY: 'castello_auth_hash',
   STORAGE_SESSION_KEY: 'castello_auth_session',
   STORAGE_ATTEMPTS_KEY: 'castello_auth_attempts',
+  STORAGE_TOKEN_KEY: 'castello_auth_token',
   MAX_ATTEMPTS: 5,
   ATTEMPT_RESET_TIME: 900000 // 15 minutes
 };
@@ -2091,24 +2072,30 @@ const auth = {
   defaultPasswordHash: null,
 
   async init() {
-    // Ініціалізувати хеш по умовчанню
-    this.defaultPasswordHash = await PasswordHasher.hashPassword(AUTH_CONFIG.DEFAULT_PASSWORD);
+    // Ініціалізувати API клієнт
+    await apiClient.init();
     
-    // Перевірити чи є активна сесія
-    const session = localStorage.getItem(AUTH_CONFIG.STORAGE_SESSION_KEY);
-    if (session) {
+    // Перевірити чи є активний токен
+    const token = localStorage.getItem(AUTH_CONFIG.STORAGE_TOKEN_KEY);
+    if (token) {
       this.isAuthenticated = true;
-      // Перевірити чи є збережений пароль в сесії
-      const sessionPassword = sessionStorage.getItem('_session_pwd') || localStorage.getItem('_session_pwd');
-      if (sessionPassword) {
-        ENCRYPTION_PASSWORD = sessionPassword;
+      apiClient.token = token;
+      
+      // Завантажити дані з API
+      const recipes = await apiClient.getRecipes();
+      const prices = await apiClient.getPrices();
+      
+      if (recipes) {
+        DB = recipes;
+        // Оновити COST_PRICES з сервера
+        Object.assign(COST_PRICES, prices);
+        this.hideAuthModal();
+        app.init();
       } else {
-        // Якщо пароль не знайдено, використовуємо стандартний
-        ENCRYPTION_PASSWORD = AUTH_CONFIG.DEFAULT_PASSWORD;
+        // Токен невалідний, потрібна нова аутентифікація
+        localStorage.removeItem(AUTH_CONFIG.STORAGE_TOKEN_KEY);
+        this.setupAuthEvents();
       }
-      await loadDatabase();
-      this.hideAuthModal();
-      app.init();
     } else {
       this.setupAuthEvents();
     }
@@ -2184,9 +2171,6 @@ const auth = {
   },
 
   async authenticate(input) {
-    const storedHash = localStorage.getItem(AUTH_CONFIG.STORAGE_PASSWORD_HASH_KEY);
-    const correctHash = storedHash || this.defaultPasswordHash;
-    const rememberMe = document.getElementById('rememberMe')?.checked;
     const authError = document.getElementById('authError');
     const authAttempts = document.getElementById('authAttempts');
     const authPassword = document.getElementById('authPassword');
@@ -2203,37 +2187,34 @@ const auth = {
       this.failedAttempts = 0;
     }
 
-    // Перевірити пароль
-    const isCorrect = await PasswordHasher.verifyPassword(input, correctHash);
-    if (isCorrect) {
+    // Зварт до API для аутентифікації
+    const result = await apiClient.authenticate(input);
+    
+    if (result.success) {
       this.isAuthenticated = true;
       this.failedAttempts = 0;
       
-      // Встановити пароль для шифрування БД
-      ENCRYPTION_PASSWORD = input;
-      await loadDatabase();
-
-      // Встановити сесію
-      if (rememberMe) {
-        const sessionToken = 'session_' + Date.now();
-        localStorage.setItem(AUTH_CONFIG.STORAGE_SESSION_KEY, sessionToken);
-        // Зберегти пароль у localStorage для відновлення сесії
-        localStorage.setItem('_session_pwd', input);
+      // Завантажити дані з API
+      const recipes = await apiClient.getRecipes();
+      const prices = await apiClient.getPrices();
+      
+      if (recipes && prices) {
+        DB = recipes;
+        Object.assign(COST_PRICES, prices);
+        
+        this.hideAuthModal();
+        app.init();
+        app.showToast('✓ Авторизація успішна');
       } else {
-        sessionStorage.setItem(AUTH_CONFIG.STORAGE_SESSION_KEY, 'temporary');
-        // Зберегти пароль у sessionStorage для відновлення сесії
-        sessionStorage.setItem('_session_pwd', input);
+        authError.textContent = '❌ Помилка завантаження даних';
+        authError.style.display = 'block';
       }
-
-      this.hideAuthModal();
-      app.init();
-      app.showToast('✓ Авторизація успішна');
     } else {
       this.failedAttempts++;
       this.attemptTimestamp = now;
       const remaining = AUTH_CONFIG.MAX_ATTEMPTS - this.failedAttempts;
 
-      authError.textContent = '❌ Невірне кодове слово';
+      authError.textContent = '❌ Невірний пароль';
       authError.style.display = 'block';
       authPassword.value = '';
       authPassword.focus();
@@ -2267,7 +2248,7 @@ const app = {
     // Перевірити що DB визначена і має необхідні властивості
     if (!DB || !DB.recipes || !Array.isArray(DB.recipes)) {
       console.error('БД не завантажена правильно');
-      DB = RECIPES_DATA;
+      return;
     }
     app.renderCats();
     app.renderList();
