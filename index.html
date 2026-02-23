@@ -1346,7 +1346,6 @@ input::placeholder, textarea::placeholder {
       <button class="btn-ghost btn-icon" id="btnPrices" title="Управління цінами"><i class="ri-price-tag-3-line"></i></button>
       <button class="btn-ghost btn-icon" id="btnSecurity" title="Безпека"><i class="ri-lock-line"></i></button>
       <button class="btn-ghost btn-icon" id="btnAbout" title="Про програму"><i class="ri-information-line"></i></button>
-      <button class="btn-primary" id="btnAdmin"><i class="ri-hammer-line"></i> Адміністрування</button>
     </div>
   </header>
 
@@ -1386,9 +1385,14 @@ input::placeholder, textarea::placeholder {
           <h2 id="dName" style="margin:0; font-size: 26px">Назва</h2>
           <span id="dCat" class="badge">Категорія</span>
         </div>
-        <div class="qty-display">
-          <label for="recipeQty">Кількість:</label>
-          <input id="recipeQty" type="number" min="1" max="100" value="1">
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <div class="qty-display">
+            <label for="recipeQty">Кількість:</label>
+            <input id="recipeQty" type="number" min="1" max="100" value="1">
+          </div>
+          <button id="btnEditRecipe" class="btn-primary" title="Редагувати рецепт">
+            <i class="ri-edit-line"></i> Редагувати
+          </button>
         </div>
       </div>
 
@@ -1548,6 +1552,43 @@ input::placeholder, textarea::placeholder {
   </div>
 </div>
 
+<!-- EDIT RECIPE MODAL -->
+<div id="editRecipeModal" class="modal-overlay hidden">
+  <div class="modal" style="max-width: 500px;">
+    <div class="modal-header">
+      <h3 class="section-title" style="margin:0"><i class="ri-edit-line"></i> Редагувати рецепт</h3>
+      <button class="btn-ghost btn-icon" id="btnCloseEditRecipe"><i class="ri-close-line"></i></button>
+    </div>
+    <div class="modal-content">
+      <div style="margin-bottom: 15px;">
+        <label style="color: var(--text-muted); font-size: 12px;">Назва рецепту</label>
+        <input type="text" id="editRecipeName" class="input-field" placeholder="Введіть назву" style="width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px;">
+      </div>
+      
+      <div style="margin-bottom: 15px;">
+        <label style="color: var(--text-muted); font-size: 12px;">Категорія</label>
+        <select id="editRecipeCat" style="width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; background-color: var(--bg-secondary);">
+          <option value="Інше">Інше</option>
+          <option value="Інструменти">Інструменти</option>
+          <option value="Броня">Броня</option>
+          <option value="Озброєння">Озброєння</option>
+          <option value="Декоративні">Декоративні</option>
+        </select>
+      </div>
+      
+      <div style="margin-bottom: 15px;">
+        <label style="color: var(--text-muted); font-size: 12px;">Компоненти (один на рядок, формат: назва:кількість)</label>
+        <textarea id="editRecipeRes" class="input-field" placeholder="Приклад:&#10;Золото:5&#10;Срібло:3" style="width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; min-height: 120px; font-family: monospace; resize: vertical;"></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" id="btnCancelEdit"><i class="ri-close-line"></i> Скасувати</button>
+        <button class="btn-primary" id="btnSaveEdit"><i class="ri-save-line"></i> Зберегти</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ABOUT MODAL -->
 <div id="aboutModal" class="modal-overlay hidden">
   <div class="modal" style="max-width: 600px; max-height: 80vh; overflow-y: auto;">
@@ -1557,33 +1598,6 @@ input::placeholder, textarea::placeholder {
     </div>
     <div class="modal-content" id="aboutContent">
       <!-- Вміст буде заповнений JS -->
-    </div>
-  </div>
-</div>
-
-<div id="adminModal" class="modal-overlay hidden">
-  <div class="modal">
-    <div class="modal-header">
-      <h3 class="section-title" style="margin:0">Редагування рецепту</h3>
-      <button class="btn-ghost btn-icon" id="btnCloseAdmin"><i class="ri-close-line"></i></button>
-    </div>
-    <div class="modal-content">
-      <input id="admName" placeholder="Назва предмета">
-      <select id="admCat">
-        <option value="Гвинтівка">Гвинтівка</option>
-        <option value="Дробовик">Дробовик</option>
-        <option value="Револьвер">Револьвер</option>
-        <option value="Ріпітер">Ріпітер</option>
-        <option value="Інструменти">Інструменти</option>
-        <option value="Інше">Інше</option>
-      </select>
-      <textarea id="admRes" rows="6" placeholder="Ресурси (один на рядок), напр:&#10;Дуло:1&#10;Злиток заліза:5"></textarea>
-      
-      <div class="modal-actions">
-        <button class="btn-primary" id="btnSaveAdmin">Зберегти</button>
-        <button class="btn-ghost" id="btnResetAdmin">Очистити</button>
-        <button class="btn-danger" id="btnDelete" style="display:none"><i class="ri-delete-bin-line"></i></button>
-      </div>
     </div>
   </div>
 </div>
@@ -1703,6 +1717,60 @@ const apiClient = {
     } catch (error) {
       console.error('Помилка при отриманні цін:', error);
       return {};
+    }
+  },
+
+  async updateRecipe(recipeId, recipeData) {
+    // Оновити рецепт на сервері
+    try {
+      if (!this.token) {
+        throw new Error('Не авторизовано');
+      }
+
+      const response = await fetch(`${this.baseURL}/api/recipes/${recipeId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.token}`
+        },
+        body: JSON.stringify(recipeData)
+      });
+
+      if (!response.ok) {
+        throw new Error('Помилка при оновленні рецепту');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Помилка при оновленні рецепту:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  async updatePrices(pricesData) {
+    // Оновити ціни на сервері
+    try {
+      if (!this.token) {
+        throw new Error('Не авторизовано');
+      }
+
+      const response = await fetch(`${this.baseURL}/api/prices`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.token}`
+        },
+        body: JSON.stringify(pricesData)
+      });
+
+      if (!response.ok) {
+        throw new Error('Помилка при оновленні цін');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Помилка при оновленні цін:', error);
+      return { success: false, error: error.message };
     }
   },
 
@@ -2435,21 +2503,6 @@ if (dBase) {
     }
   },
 
-  toggleAdmin() {
-    const modal = document.getElementById('adminModal');
-    if (!modal) return;
-    const isHidden = modal.classList.contains('hidden');
-    if (isHidden) {
-      admin.reset();
-      if (ACTIVE_ID) {
-        admin.load(ACTIVE_ID);
-      }
-      modal.classList.remove('hidden');
-    } else {
-      modal.classList.add('hidden');
-    }
-  },
-
   toggleTheme() {
     const html = document.documentElement;
     const isLight = html.classList.toggle('light-theme');
@@ -2484,78 +2537,6 @@ if (dBase) {
   }
 };
 
-/* --- ADMIN --- */
-const admin = {
-  load(id) {
-    const r = DB.recipes.find(x => x.id === id);
-    if(!r) return;
-    document.getElementById('admName').value = r.name;
-    document.getElementById('admCat').value = r.cat;
-    document.getElementById('admRes').value = Object.entries(r.resources).map(([k,v]) => `${k}:${v}`).join('\n');
-    document.getElementById('btnDelete').style.display = 'inline-block';
-  },
-  
-  reset() {
-    document.getElementById('admName').value = '';
-    document.getElementById('admCat').value = 'Інше';
-    document.getElementById('admRes').value = '';
-    document.getElementById('btnDelete').style.display = 'none';
-  },
-  
-  save() {
-    const name = document.getElementById('admName').value?.trim();
-    const cat = document.getElementById('admCat').value;
-    const resText = document.getElementById('admRes').value;
-    
-    if(!name) {
-      app.showToast('Вкажіть назву', true);
-      return;
-    }
-    
-    const { resources, errors } = utils.validateResourcesText(resText);
-    
-    if (errors.length > 0) {
-      app.showToast(errors[0], true);
-      return;
-    }
-
-    if(Object.keys(resources).length === 0) {
-      app.showToast('Додайте хоча б один ресурс', true);
-      return;
-    }
-
-    const isEditing = ACTIVE_ID && document.getElementById('btnDelete').style.display !== 'none';
-    let r = isEditing ? DB.recipes.find(x => x.id === ACTIVE_ID) : null;
-
-    if(r) {
-      r.name = name; 
-      r.cat = cat; 
-      r.resources = resources;
-      app.showToast('✓ Оновлено');
-    } else {
-      const newId = Date.now();
-      DB.recipes.push({ id: newId, name, cat, resources });
-      app.showToast('✓ Створено');
-    }
-    
-    app.saveDB();
-    app.toggleAdmin();
-  },
-  
-  del() {
-    if(confirm(CONFIG.CONFIRM_DELETE)) {
-      const deletedId = ACTIVE_ID;
-      DB.recipes = DB.recipes.filter(x => x.id !== deletedId);
-      ACTIVE_ID = null;
-      app.saveDB();
-      app.toggleAdmin();
-      document.getElementById('detailContent').style.display = 'none';
-      document.getElementById('emptyState').classList.remove('hidden');
-      app.showToast('✓ Видалено');
-    }
-  }
-};
-
 /* --- INIT --- */
 // Завантажити збережену тему
 const savedTheme = localStorage.getItem(CONFIG.THEME_STORAGE_KEY);
@@ -2580,23 +2561,23 @@ const addEventListenerSafe = (id, event, handler) => {
   }
 };
 
-addEventListenerSafe('btnAdmin', 'click', () => app.toggleAdmin());
-addEventListenerSafe('btnCloseAdmin', 'click', () => app.toggleAdmin());
+// Видалено адміністрування
 addEventListenerSafe('btnPrices', 'click', () => prices.show());
 addEventListenerSafe('btnClosePrices', 'click', () => prices.hide());
 addEventListenerSafe('btnSecurity', 'click', () => security.show());
 addEventListenerSafe('btnCloseSecurity', 'click', () => security.hide());
 addEventListenerSafe('btnAbout', 'click', () => about.show());
 addEventListenerSafe('btnCloseAbout', 'click', () => about.hide());
+addEventListenerSafe('btnEditRecipe', 'click', () => editRecipe.show(ACTIVE_ID));
+addEventListenerSafe('btnCloseEditRecipe', 'click', () => editRecipe.hide());
+addEventListenerSafe('btnCancelEdit', 'click', () => editRecipe.hide());
+addEventListenerSafe('btnSaveEdit', 'click', () => editRecipe.save());
 addEventListenerSafe('btnLogout', 'click', () => {
   if (confirm('Ви впевнені, що хочете вийти?')) {
     auth.logout();
   }
 });
 addEventListenerSafe('btnTheme', 'click', () => app.toggleTheme());
-addEventListenerSafe('btnSaveAdmin', 'click', () => admin.save());
-addEventListenerSafe('btnResetAdmin', 'click', () => admin.reset());
-addEventListenerSafe('btnDelete', 'click', () => admin.del());
 addEventListenerSafe('btnClearSearch', 'click', () => {
   const searchInput = document.getElementById('search');
   searchInput.value = '';
@@ -2801,6 +2782,86 @@ const setupMobileNav = () => {
   
   // По замовченню показуємо список
   switchToList();
+};
+
+/* --- EDIT RECIPE CONTROLLER --- */
+const editRecipe = {
+  currentRecipeId: null,
+
+  show(recipeId) {
+    const recipe = DB.recipes.find(r => r.id === recipeId);
+    if (!recipe) return;
+    
+    this.currentRecipeId = recipeId;
+    document.getElementById('editRecipeName').value = recipe.name;
+    document.getElementById('editRecipeCat').value = recipe.cat;
+    
+    // Формувати рядки ресурсів у форматі: назва:кількість
+    const resText = Object.entries(recipe.resources)
+      .map(([name, qty]) => `${name}:${qty}`)
+      .join('\n');
+    document.getElementById('editRecipeRes').value = resText;
+    
+    // Показати модаль
+    document.getElementById('editRecipeModal').classList.remove('hidden');
+  },
+  
+  hide() {
+    document.getElementById('editRecipeModal').classList.add('hidden');
+    this.currentRecipeId = null;
+  },
+  
+  async save() {
+    const name = document.getElementById('editRecipeName').value.trim();
+    const cat = document.getElementById('editRecipeCat').value;
+    const resText = document.getElementById('editRecipeRes').value;
+    
+    if (!name) {
+      app.showToast('Введіть назву рецепту', true);
+      return;
+    }
+    
+    // Парсити ресурси з формату: назва:кількість
+    const resources = {};
+    const lines = resText.split('\n').filter(l => l.trim());
+    
+    for (const line of lines) {
+      const [resName, qtyStr] = line.split(':');
+      const qty = parseInt(qtyStr);
+      
+      if (!resName?.trim() || isNaN(qty) || qty <= 0) {
+        app.showToast('Невірний формат. Використовуйте: назва:кількість', true);
+        return;
+      }
+      
+      resources[resName.trim()] = qty;
+    }
+    
+    if (Object.keys(resources).length === 0) {
+      app.showToast('Додайте хоча б один компонент', true);
+      return;
+    }
+    
+    // Оновити локально
+    const recipe = DB.recipes.find(r => r.id === this.currentRecipeId);
+    if (recipe) {
+      recipe.name = name;
+      recipe.cat = cat;
+      recipe.resources = resources;
+      
+      try {
+        // Синхронізувати з сервером
+        await apiClient.updateRecipe(this.currentRecipeId, recipe);
+        app.showToast('✓ Рецепт оновлено');
+        
+        // Оновити відображення
+        app.select(this.currentRecipeId);
+        this.hide();
+      } catch (err) {
+        app.showToast('Помилка при збереженні: ' + err.message, true);
+      }
+    }
+  }
 };
 
 /* --- PRICES CONTROLLER --- */
