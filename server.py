@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 import hashlib
 import json
 from datetime import datetime
+import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static', static_url_path='')
 CORS(app)
 
 # ============================================
@@ -126,6 +127,11 @@ def get_prices():
 def health_check():
     """Перевірка статусу сервера"""
     return jsonify({"status": "ok", "timestamp": datetime.now().isoformat()})
+
+@app.route('/')
+def serve_index():
+    """Служити index.html"""
+    return send_from_directory('.', 'index.html')
 
 # ============================================
 # ЗАПУСК
