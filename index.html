@@ -1611,7 +1611,23 @@ const COST_PRICES = {}; // Заповняється з сервера
 let DB;
 let ENCRYPTION_PASSWORD = null;
 
-/* --- API CLIENT --- */
+let ACTIVE_ID = null;
+let DEBOUNCE_TIMER = null;
+let HISTORY = []; // Для undo/redo
+let HISTORY_INDEX = -1;
+
+// --- AUTHENTICATION CONFIG ---
+const AUTH_CONFIG = {
+  API_URL: 'https://castello-guns-api.onrender.com',
+  STORAGE_PASSWORD_HASH_KEY: 'castello_auth_hash',
+  STORAGE_SESSION_KEY: 'castello_auth_session',
+  STORAGE_ATTEMPTS_KEY: 'castello_auth_attempts',
+  STORAGE_TOKEN_KEY: 'castello_auth_token',
+  MAX_ATTEMPTS: 5,
+  ATTEMPT_RESET_TIME: 900000 // 15 minutes
+};
+
+/* --- API CLIENT (після AUTH_CONFIG) --- */
 const apiClient = {
   baseURL: AUTH_CONFIG.API_URL,
   token: null,
@@ -1694,21 +1710,6 @@ const apiClient = {
     this.token = null;
     localStorage.removeItem(AUTH_CONFIG.STORAGE_TOKEN_KEY);
   }
-};
-let ACTIVE_ID = null;
-let DEBOUNCE_TIMER = null;
-let HISTORY = []; // Для undo/redo
-let HISTORY_INDEX = -1;
-
-// --- AUTHENTICATION CONFIG ---
-const AUTH_CONFIG = {
-  API_URL: 'https://castello-guns-api.onrender.com',
-  STORAGE_PASSWORD_HASH_KEY: 'castello_auth_hash',
-  STORAGE_SESSION_KEY: 'castello_auth_session',
-  STORAGE_ATTEMPTS_KEY: 'castello_auth_attempts',
-  STORAGE_TOKEN_KEY: 'castello_auth_token',
-  MAX_ATTEMPTS: 5,
-  ATTEMPT_RESET_TIME: 900000 // 15 minutes
 };
 
 // --- VERSION INFO ---
