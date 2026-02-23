@@ -8,7 +8,7 @@ import json
 from datetime import datetime
 import os
 
-app = Flask(__name__, static_folder='static', static_url_path='')
+app = Flask(__name__)
 CORS(app)
 
 # ============================================
@@ -79,9 +79,9 @@ COST_PRICES = {
     "Форма з глини": 5,
 }
 
-# Безпека: Пароль зберігається як хеш
-DEFAULT_PASSWORD_HASH = "ad3ca0d8024c8a3d5fe0c0947c9a4eb9d8c5f7a72e8b3c1f9d6e4a2b5c8f1"  # SHA-256 від 'castellllo'
-AUTH_TOKEN = None
+# Безпека: Простий пароль на сервері (дані вже захищені на хостингу)
+DEFAULT_PASSWORD = "castellllo"
+AUTH_TOKENS = {}  # Валідні токени (просто список)
 
 # ============================================
 # API РОУТИ
@@ -93,13 +93,12 @@ def authenticate():
     data = request.get_json()
     password = data.get('password', '')
     
-    # Хешируємо введений пароль
-    password_hash = hashlib.sha256(password.encode()).hexdigest()
-    
-    if password_hash == DEFAULT_PASSWORD_HASH:
-        global AUTH_TOKEN
-        AUTH_TOKEN = hashlib.sha256(f"{password}{datetime.now()}".encode()).hexdigest()
-        return jsonify({"success": True, "token": AUTH_TOKEN})
+    # Простіше: просто перевіряємо пароль
+    if password == DEFAULT_PASSWORD:
+        # Генеруємо простий токен
+        token = hashlib.sha256(f"{password}{datetime.now()}".encode()).hexdigest()
+        AUTH_TOKENS[token] = {"created": datetime.now().isoformat()}
+        return jsonify({"success": True, "token": token})
     
     return jsonify({"success": False, "error": "Невірний пароль"}), 401
 
@@ -108,7 +107,8 @@ def get_recipes():
     """Отримати всі рецепти"""
     token = request.headers.get('Authorization', '').replace('Bearer ', '')
     
-    if not token or token != AUTH_TOKEN:
+    # Простіша перевірка: чи токен існує в нашому списку
+    if not token or token not in AUTH_TOKENS:
         return jsonify({"error": "Не авторизовано"}), 401
     
     return jsonify(RECIPES_DATA)
@@ -118,7 +118,7 @@ def get_prices():
     """Отримати ціни"""
     token = request.headers.get('Authorization', '').replace('Bearer ', '')
     
-    if not token or token != AUTH_TOKEN:
+    if not token or token not in AUTH_TOKENS:
         return jsonify({"error": "Не авторизовано"}), 401
     
     return jsonify(COST_PRICES)
