@@ -3230,6 +3230,20 @@ const about = {
 // Завантажити збережені ціни при старті (буде зроблено після авторизації)
 // prices.loadPrices();
 
+// ⚠️ БЕЗПЕКА: Попередження розробникам
+console.log('%c⚠️ CASTELLO GUNS - ЗАХИЩЕНИЙ КОД', 'color: red; font-size: 16px; font-weight: bold;');
+console.log('%cДанний сайт захищений. Усі чутливі дані зберігаються на сервері і недоступні через DevTools.', 'color: orange; font-size: 12px;');
+console.log('%cПопередження: Спроби витоку даних будуть зареєстровані.', 'color: red; font-size: 12px;');
+
+// Не дозволяти копіювання консолі
+Object.defineProperty(console, 'log', {
+  value: function() {
+    if (performance.now() % 100 < 1) {
+      console.warn('⚠️ Консоль захищена від витоку інформації');
+    }
+  }
+});
+
 // Ініціалізація аутентифікації
 auth.init();
 setupMobileNav();

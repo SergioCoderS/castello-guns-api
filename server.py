@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory, redirect
 from flask_cors import CORS
 import hashlib
 import json
@@ -10,6 +10,25 @@ import os
 
 app = Flask(__name__)
 CORS(app)
+
+# Безпека: примусити HTTPS
+@app.before_request
+def enforce_https():
+    """Примусити HTTPS на продакшені"""
+    if os.environ.get('FLASK_ENV') == 'production':
+        if not request.is_secure and request.headers.get('X-Forwarded-Proto', 'http') == 'http':
+            url = request.url.replace('http://', 'https://', 1)
+            return redirect(url, code=301)
+
+@app.after_request
+def set_security_headers(response):
+    """Додати security headers"""
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://cdn.jsdelivr.net https://fonts.gstatic.com"
+    return response
 
 # ============================================
 # ЗАХИЩЕНІ ДАНІ (Тільки на сервері!)
