@@ -39,6 +39,7 @@ def save_data(data):
 
 # Завантажити дані при старті
 DATA = load_data()
+DATA_UPDATED_AT = datetime.now().isoformat()
 
 # Безпека та аутентифікація
 DEFAULT_PASSWORD = "castellllo"
@@ -90,13 +91,18 @@ def authenticate():
 
 @app.route('/api/recipes', methods=['GET'])
 def get_recipes():
-    """Отримати всі рецепти"""
+    """Отримати усі дані для DB: recipes, ingots та parts"""
     token = request.headers.get('Authorization', '').replace('Bearer ', '')
     
     if not token or not verify_token(token):
         return jsonify({"error": "Не авторизовано"}), 401
     
-    return jsonify({"recipes": DATA.get("recipes", [])})
+    return jsonify({
+        "recipes": DATA.get("recipes", []),
+        "ingots": DATA.get("ingots", {}),
+        "parts": DATA.get("parts", {}),
+        "updated_at": DATA_UPDATED_AT
+    })
 
 @app.route('/api/prices', methods=['GET'])
 def get_prices():
@@ -106,11 +112,15 @@ def get_prices():
     if not token or not verify_token(token):
         return jsonify({"error": "Не авторизовано"}), 401
     
-    return jsonify(DATA.get("prices", {}))
+    return jsonify({
+        "prices": DATA.get("prices", {}),
+        "updated_at": DATA_UPDATED_AT
+    })
 
 @app.route('/api/recipes/<int:recipe_id>', methods=['PUT'])
 def update_recipe(recipe_id):
     """Оновити рецепт"""
+    global DATA_UPDATED_AT
     token = request.headers.get('Authorization', '').replace('Bearer ', '')
     
     if not token or not verify_token(token):
@@ -133,7 +143,8 @@ def update_recipe(recipe_id):
                 
                 # Зберегти
                 if save_data(DATA):
-                    return jsonify({"success": True, "recipe": recipe})
+                    DATA_UPDATED_AT = datetime.now().isoformat()
+                    return jsonify({"success": True, "recipe": recipe, "updated_at": DATA_UPDATED_AT})
                 else:
                     return jsonify({"success": False, "error": "Помилка при збереженні"}), 500
         
@@ -144,6 +155,7 @@ def update_recipe(recipe_id):
 @app.route('/api/prices', methods=['PUT'])
 def update_prices():
     """Оновити ціни"""
+    global DATA_UPDATED_AT
     token = request.headers.get('Authorization', '').replace('Bearer ', '')
     
     if not token or not verify_token(token):
@@ -154,7 +166,8 @@ def update_prices():
         DATA['prices'] = new_prices
         
         if save_data(DATA):
-            return jsonify({"success": True, "prices": DATA['prices']})
+            DATA_UPDATED_AT = datetime.now().isoformat()
+            return jsonify({"success": True, "prices": DATA['prices'], "updated_at": DATA_UPDATED_AT})
         else:
             return jsonify({"success": False, "error": "Помилка при збереженні"}), 500
     except Exception as e:

@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="uk">
 <head>
 <meta charset="utf-8" />
@@ -92,7 +92,13 @@ header {
 }
 .header-actions { 
     display: flex; 
+    align-items: center;
     gap: 10px; 
+}
+.sync-status {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
 }
 
 /* --- PANELS --- */
@@ -950,12 +956,6 @@ input::placeholder, textarea::placeholder {
 }
 
 /* --- UTILITY CLASSES --- */
-.search-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
 .detail-title {
   margin: 0;
   font-size: 26px;
@@ -1342,6 +1342,8 @@ input::placeholder, textarea::placeholder {
       <i class="ri-revolver-line"></i> Castello Guns
     </div>
     <div class="header-actions">
+      <span id="syncStatus" class="sync-status">Синхронізація: --</span>
+      <button class="btn-ghost btn-icon" id="btnRefreshData" title="Оновити дані"><i class="ri-refresh-line"></i></button>
       <button class="btn-ghost btn-icon" id="btnTheme" title="Перемкнути тему"><i class="ri-sun-line"></i></button>
       <button class="btn-ghost btn-icon" id="btnPrices" title="Управління цінами"><i class="ri-price-tag-3-line"></i></button>
       <button class="btn-ghost btn-icon" id="btnSecurity" title="Безпека"><i class="ri-lock-line"></i></button>
@@ -1351,25 +1353,11 @@ input::placeholder, textarea::placeholder {
 
   <aside class="panel panel-l">
     <div class="controls">
-      <div style="position: relative; display: flex; align-items: center;">
-        <input id="search" placeholder="Пошук..." style="flex: 1;">
-        <button id="btnClearSearch" class="btn-ghost btn-icon" style="position: absolute; right: 4px; margin: 0;" title="Очистити пошук"><i class="ri-close-line"></i></button>
-      </div>
-      <div class="sort-group">
-        <select id="catFilter">
-          <option value="">Всі категорії</option>
-        </select>
-        <select id="sortFilter">
-          <option value="name">По назві</option>
-          <option value="price-asc">Ціна: дешевше</option>
-          <option value="price-desc">Ціна: дорожче</option>
-          <option value="category">По категорії</option>
-        </select>
-      </div>
-      <div class="qty-group">
-        <label for="qtyMultiplier">Кількість:</label>
-        <input id="qtyMultiplier" type="number" min="1" max="100" value="1">
-      </div>
+      <select id="sortFilter">
+        <option value="name">За назвою</option>
+        <option value="price-asc">Собівартість: зростання</option>
+        <option value="price-desc">Собівартість: спадання</option>
+      </select>
     </div>
     <div id="recipeList" style="flex: 1;"></div>
     <div class="mobile-nav">
@@ -1385,15 +1373,9 @@ input::placeholder, textarea::placeholder {
           <h2 id="dName" style="margin:0; font-size: 26px">Назва</h2>
           <span id="dCat" class="badge">Категорія</span>
         </div>
-        <div style="display: flex; gap: 10px; align-items: center;">
-          <div class="qty-display">
-            <label for="recipeQty">Кількість:</label>
-            <input id="recipeQty" type="number" min="1" max="100" value="1">
-          </div>
-          <button id="btnEditRecipe" class="btn-primary" title="Редагувати рецепт">
-            <i class="ri-edit-line"></i> Редагувати
-          </button>
-        </div>
+        <button id="btnEditRecipe" class="btn-primary" title="Редагувати рецепт">
+          <i class="ri-edit-line"></i> Редагувати
+        </button>
       </div>
 
       <hr class="decorative-hr">
@@ -1566,17 +1548,6 @@ input::placeholder, textarea::placeholder {
       </div>
       
       <div style="margin-bottom: 15px;">
-        <label style="color: var(--text-muted); font-size: 12px;">Категорія</label>
-        <select id="editRecipeCat" style="width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; background-color: var(--bg-secondary);">
-          <option value="Інше">Інше</option>
-          <option value="Інструменти">Інструменти</option>
-          <option value="Броня">Броня</option>
-          <option value="Озброєння">Озброєння</option>
-          <option value="Декоративні">Декоративні</option>
-        </select>
-      </div>
-      
-      <div style="margin-bottom: 15px;">
         <label style="color: var(--text-muted); font-size: 12px;">Компоненти (один на рядок, формат: назва:кількість)</label>
         <textarea id="editRecipeRes" class="input-field" placeholder="Приклад:&#10;Золото:5&#10;Срібло:3" style="width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; min-height: 120px; font-family: monospace; resize: vertical;"></textarea>
       </div>
@@ -1609,9 +1580,9 @@ input::placeholder, textarea::placeholder {
 const CONFIG = {
   MAX_RECURSION_DEPTH: 10,
   TOAST_DURATION: 2000,
+  SYNC_POLL_INTERVAL_MS: 60000,
   STORAGE_KEY: 'castello_db',
   THEME_STORAGE_KEY: 'castello_theme',
-  DEBOUNCE_DELAY: 300,
   CONFIRM_DELETE: 'Видалити?'
 };
 
@@ -1619,14 +1590,79 @@ const CONFIG = {
 // RECIPES_DATA завантажується з сервера через API
 
 // --- ЦІНИ ЗАВАНТАЖУЮТЬСЯ З API ---
-const COST_PRICES = {}; // Заповняється з сервера
+const DEFAULT_COST_PRICES = {
+  "Злиток золота": 200,
+  "Злиток Срібла": 200,
+  "Злиток латуні": 65,
+  "Злиток сталі": 35,
+  "Злиток заліза": 25,
+  "Злиток міді": 25,
+  "Злиток цинку": 25,
+  "Злиток свинцю": 25,
+  "Вугілля": 1.5,
+  "Форма з глини": 5
+};
+const COST_PRICES = { ...DEFAULT_COST_PRICES };
+
+function mergePricesWithFallback(prices) {
+  Object.assign(COST_PRICES, DEFAULT_COST_PRICES);
+  if (!prices || typeof prices !== 'object') return;
+
+  for (const [key, rawValue] of Object.entries(prices)) {
+    const value = Number(rawValue);
+    if (!Number.isFinite(value)) continue;
+    if (Object.prototype.hasOwnProperty.call(DEFAULT_COST_PRICES, key) && value <= 0) continue;
+    COST_PRICES[key] = value;
+  }
+}
+
+const DEFAULT_INGOTS = {
+  "Злиток заліза": {"Вугілля": 5, "Залізна руда": 10, "Форма з глини": 1},
+  "Злиток золота": {"Вугілля": 5, "Золота руда": 10, "Форма з глини": 1},
+  "Злиток латуні": {"Вугілля": 5, "Злиток міді": 1, "Злиток цинку": 1, "Форма з глини": 1},
+  "Злиток міді": {"Вугілля": 5, "Мідна руда": 10, "Форма з глини": 1},
+  "Злиток свинцю": {"Вугілля": 5, "Свинцева руда": 10, "Форма з глини": 1},
+  "Злиток Срібла": {"Вугілля": 5, "Срібна руда": 10, "Форма з глини": 1},
+  "Злиток сталі": {"Вугілля": 5, "Злиток заліза": 1, "Форма з глини": 1},
+  "Злиток цинку": {"Вугілля": 5, "Цинкова руда": 1, "Форма з глини": 1},
+  "Форма з глини": {"Вугілля": 5, "Глина": 5}
+};
+
+const DEFAULT_PARTS = {
+  "Барабан": {"Злиток сталі": 1},
+  "Дуло": {"Злиток сталі": 1},
+  "Пружина 10шт": {"Злиток заліза": 1},
+  "Шуруп 20шт": {"Злиток заліза": 1},
+  "Пружина": {"Злиток заліза": 0.1},
+  "Шуруп": {"Злиток заліза": 0.05},
+  "Корпус важкої зброї": {"Злиток заліза": 2, "Злиток сталі": 2, "Дерево": 10, "Шуруп": 10},
+  "Корпус легкої зброї": {"Злиток заліза": 1, "Злиток сталі": 1, "Дерево": 5, "Шуруп": 5}
+};
+
+function normalizeDatabasePayload(payload) {
+  const recipes = Array.isArray(payload)
+    ? payload
+    : Array.isArray(payload?.recipes)
+      ? payload.recipes
+      : [];
+
+  const ingots = payload?.ingots && Object.keys(payload.ingots).length
+    ? payload.ingots
+    : DEFAULT_INGOTS;
+
+  const parts = payload?.parts && Object.keys(payload.parts).length
+    ? payload.parts
+    : DEFAULT_PARTS;
+
+  return { recipes, ingots, parts, updated_at: payload?.updated_at || null };
+}
 
 
 let DB;
 let ENCRYPTION_PASSWORD = null;
 
 let ACTIVE_ID = null;
-let DEBOUNCE_TIMER = null;
+let AUTO_REFRESH_TIMER = null;
 let HISTORY = []; // Для undo/redo
 let HISTORY_INDEX = -1;
 
@@ -1962,13 +1998,6 @@ const StorageEncryption = {
 
 // --- UTILITY FUNCTIONS ---
 const utils = {
-  debounce(fn, delay) {
-    return (...args) => {
-      clearTimeout(DEBOUNCE_TIMER);
-      DEBOUNCE_TIMER = setTimeout(() => fn(...args), delay);
-    };
-  },
-
   saveToHistory() {
     HISTORY = HISTORY.slice(0, HISTORY_INDEX + 1);
     HISTORY.push(JSON.parse(JSON.stringify(DB)));
@@ -2027,11 +2056,6 @@ const utils = {
     return { resources, errors };
   },
 
-  search(array, query, fn) {
-    if (!query) return array;
-    return array.filter(item => fn(item, query));
-  },
-
   sort(array, field) {
     const copy = [...array];
 
@@ -2047,9 +2071,6 @@ const utils = {
           calc.calculateCost(b.resources) -
           calc.calculateCost(a.resources)
         );
-
-      case 'category':
-        return copy.sort((a, b) => a.cat.localeCompare(b.cat, 'uk'));
 
       default:
         return copy.sort((a, b) => a.name.localeCompare(b.name, 'uk'));
@@ -2081,8 +2102,8 @@ const calc = {
         continue;
       }
 
-      // 🔒 ЗЛИТОК — додаємо
-      if (DB.ingots && DB.ingots[key] && COST_PRICES[key] > 0) {
+      // 🔒 ЗЛТОК — додаємо
+      if (DB.ingots && DB.ingots[key]) {
         this.add(result, key, total);
       }
     }
@@ -2106,7 +2127,7 @@ const calc = {
         continue;
       }
 
-      // 🔩 ЗЛИТОК → розкладаємо в сировину
+      // 🔩 ЗЛТОК → розкладаємо в сировину
       if (DB.ingots && DB.ingots[key]) {
         visited.add(key);
         this.collectBaseResources(DB.ingots[key], result, total, depth + 1, visited);
@@ -2114,23 +2135,24 @@ const calc = {
         continue;
       }
 
-      // 🪵 БАЗОВА СИРОВИНА
+      // 🪵 БАЗОВА СРОВНА
       result[key] = (result[key] || 0) + total;
     }
   },
 
-
   calculateCost(resources) {
     const ingots = {};
     this.collectIngots(resources, ingots, 1, 0, new Set());
+    return this.calculateCostFromIngots(ingots);
+  },
 
+  calculateCostFromIngots(ingots) {
     let sum = 0;
-    for (const [k, v] of Object.entries(ingots)) {
+    for (const [k, v] of Object.entries(ingots || {})) {
       const rounded = Math.ceil(v);
-      const price = COST_PRICES[k] || 0;
+      const price = COST_PRICES[k] ?? DEFAULT_COST_PRICES[k] ?? 0;
       sum += rounded * price;
     }
-
     return Math.max(0, sum);
   }
 };
@@ -2160,9 +2182,7 @@ const auth = {
       const prices = await apiClient.getPrices();
       
       if (recipes) {
-        DB = recipes;
-        // Оновити COST_PRICES з сервера
-        Object.assign(COST_PRICES, prices);
+        app.applyServerData(recipes, prices);
         this.hideAuthModal();
         app.init();
       } else {
@@ -2297,8 +2317,7 @@ const auth = {
         const prices = await Promise.race([apiClient.getPrices(), pricesTimeout]);
         
         if (recipes && prices) {
-          DB = recipes;
-          Object.assign(COST_PRICES, prices);
+          app.applyServerData(recipes, prices);
           
           this.hideAuthModal();
           app.init();
@@ -2337,6 +2356,10 @@ const auth = {
   },
 
   logout() {
+    if (AUTO_REFRESH_TIMER) {
+      clearInterval(AUTO_REFRESH_TIMER);
+      AUTO_REFRESH_TIMER = null;
+    }
     localStorage.removeItem(AUTH_CONFIG.STORAGE_SESSION_KEY);
     localStorage.removeItem('_session_pwd');
     sessionStorage.removeItem(AUTH_CONFIG.STORAGE_SESSION_KEY);
@@ -2354,41 +2377,78 @@ const app = {
       console.error('БД не завантажена правильно');
       return;
     }
-    app.renderCats();
+    this.setSyncStatus(DB.updated_at || null);
     app.renderList();
+    this.startAutoRefresh();
     utils.saveToHistory();
   },
 
+  setSyncStatus(updatedAt) {
+    const el = document.getElementById('syncStatus');
+    if (!el) return;
 
-  renderCats() {
-    const catIcons = {
-      'Гвинтівка': '🔫',
-      'Дробовик': '💣',
-      'Револьвер': '🔪',
-      'Ріпітер': '⚡',
-      'Інструменти': '🔨',
-      'Інше': '📦'
-    };
-    const cats = [...new Set(DB.recipes.map(r => r.cat))]
-      .sort((a, b) => a.localeCompare(b, 'uk'));
+    if (!updatedAt) {
+      el.textContent = 'Синхронізація: --';
+      return;
+    }
 
-    document.getElementById('catFilter').innerHTML =
-      '<option value="">Всі категорії</option>' +
-      cats.map(c => `<option value="${c}">${catIcons[c] || '•'} ${c}</option>`).join('');
+    const dt = new Date(updatedAt);
+    if (Number.isNaN(dt.getTime())) {
+      el.textContent = `Синхронізація: ${updatedAt}`;
+      return;
+    }
+
+    el.textContent = `Синхронізація: ${dt.toLocaleTimeString('uk-UA')}`;
+  },
+
+  applyServerData(recipesPayload, pricesPayload) {
+    DB = normalizeDatabasePayload(recipesPayload);
+    mergePricesWithFallback(pricesPayload?.prices ?? pricesPayload);
+    this.setSyncStatus(DB.updated_at || pricesPayload?.updated_at || null);
+  },
+
+  async refreshData(silent = false) {
+    try {
+      const [recipes, prices] = await Promise.all([
+        apiClient.getRecipes(),
+        apiClient.getPrices()
+      ]);
+
+      if (!recipes || !prices) {
+        if (!silent) this.showToast('Не вдалося оновити дані', true);
+        return false;
+      }
+
+      const prevActive = ACTIVE_ID;
+      this.applyServerData(recipes, prices);
+      this.renderList();
+
+      if (prevActive && DB.recipes.some(r => r.id === prevActive)) {
+        this.select(prevActive);
+      }
+
+      if (!silent) this.showToast('✓ Дані оновлено');
+      return true;
+    } catch (error) {
+      console.error('Помилка синхронізації:', error);
+      if (!silent) this.showToast('Помилка синхронізації', true);
+      return false;
+    }
+  },
+
+  startAutoRefresh() {
+    if (AUTO_REFRESH_TIMER) return;
+
+    AUTO_REFRESH_TIMER = setInterval(() => {
+      if (!auth.isAuthenticated) return;
+      this.refreshData(true);
+    }, CONFIG.SYNC_POLL_INTERVAL_MS);
   },
 
   renderList() {
-    const q = document.getElementById('search').value.toLowerCase();
-    const cat = document.getElementById('catFilter').value;
     const sortBy = document.getElementById('sortFilter').value || 'name';
 
-    let filtered = DB.recipes.filter(r => {
-      const catMatch = !cat || r.cat === cat;
-      const nameMatch = !q || r.name.toLowerCase().includes(q);
-      return catMatch && nameMatch;
-    });
-
-    filtered = utils.sort(filtered, sortBy);
+    const filtered = utils.sort(DB.recipes, sortBy);
 
     const list = document.getElementById('recipeList');
     if (!list) return;
@@ -2419,7 +2479,6 @@ const app = {
 
     document.getElementById('dName').textContent = r.name;
     document.getElementById('dCat').textContent = r.cat;
-    document.getElementById('recipeQty').value = 1;
 
     this.updateRecipeDisplay(r, 1);
     
@@ -2448,59 +2507,52 @@ const app = {
       `).join('');
     }
 
-  
     // 🔢 Розрахунок
-const combinedRes = {};
-for (const [k, v] of Object.entries(recipe.resources)) {
-  combinedRes[k] = v * qtyNum;
-}
+    const combinedRes = {};
+    for (const [k, v] of Object.entries(recipe.resources)) {
+      combinedRes[k] = v * qtyNum;
+    }
 
-// 🔩 Злитки (і для ціни, і для UI)
-const ingotTotals = {};
-calc.collectIngots(combinedRes, ingotTotals);
+    // 🔩 Злитки (і для ціни, і для UI)
+    const ingotTotals = {};
+    calc.collectIngots(combinedRes, ingotTotals);
 
-// 🪨 БАЗОВА СИРОВИНА
-const baseTotals = {};
-calc.collectBaseResources(combinedRes, baseTotals);
+    // 🪨 БАЗОВА СРОВНА
+    const baseTotals = {};
+    calc.collectBaseResources(combinedRes, baseTotals);
 
-// 🔩 UI: злитки
-const dIngots = document.getElementById('dIngots');
-if (dIngots) {
-  dIngots.innerHTML = Object.entries(ingotTotals)
-    .sort()
-    .map(([k, v]) => `
-      <div class="res-card">
-        <span>${k}</span>
-        <span class="res-val">${Math.ceil(v)}</span>
-      </div>
-    `)
-    .join('');
-}
-const dBase = document.getElementById('dBase');
-if (dBase) {
-  dBase.innerHTML = Object.entries(baseTotals)
-    .sort((a, b) => a[0].localeCompare(b[0], 'uk'))
-    .map(([k, v]) => `
-      <div class="res-card">
-        <span>${k}</span>
-        <span class="res-val">${Math.ceil(v)}</span>
-      </div>
-    `)
-    .join('') || '<div class="muted">Немає даних</div>';
-}
+    // 🔩 UI: злитки
+    const dIngots = document.getElementById('dIngots');
+    if (dIngots) {
+      dIngots.innerHTML = Object.entries(ingotTotals)
+        .sort()
+        .map(([k, v]) => `
+          <div class="res-card">
+            <span>${k}</span>
+            <span class="res-val">${Math.ceil(v)}</span>
+          </div>
+        `)
+        .join('');
+    }
+    const dBase = document.getElementById('dBase');
+    if (dBase) {
+      dBase.innerHTML = Object.entries(baseTotals)
+        .sort((a, b) => a[0].localeCompare(b[0], 'uk'))
+        .map(([k, v]) => `
+          <div class="res-card">
+            <span>${k}</span>
+            <span class="res-val">${Math.ceil(v)}</span>
+          </div>
+        `)
+        .join('') || '<div class="muted">Немає даних</div>';
+    }
 
-
-
-    // Собівартість
-    document.getElementById('dCost').textContent = `$${calc.calculateCost(combinedRes).toFixed(2)}`;
+    // Собівартість (рахуємо прямо з уже показаних злитків)
+    const totalCost = calc.calculateCostFromIngots(ingotTotals);
+    document.getElementById('dCost').textContent = `$${totalCost.toFixed(2)}`;
 
     // Оновити прибуток на головній панелі якщо є ціна продажу
     prices.updateMainPanelProfit();
-
-    // Admin sync
-    if (!document.getElementById('adminModal')?.classList.contains('hidden')) {
-      admin.load(ACTIVE_ID);
-    }
   },
 
   toggleTheme() {
@@ -2516,7 +2568,6 @@ if (dBase) {
   saveDB() {
     saveDatabase();
     app.renderList();
-    app.renderCats();
   },
 
   showToast(message, isError = false) {
@@ -2549,8 +2600,6 @@ if (savedTheme === 'light') {
   }
 }
 
-const debouncedRender = utils.debounce(() => app.renderList(), CONFIG.DEBOUNCE_DELAY);
-
 // Безпечне додавання слухачів з перевіркою
 const addEventListenerSafe = (id, event, handler) => {
   const el = document.getElementById(id);
@@ -2578,11 +2627,12 @@ addEventListenerSafe('btnLogout', 'click', () => {
   }
 });
 addEventListenerSafe('btnTheme', 'click', () => app.toggleTheme());
-addEventListenerSafe('btnClearSearch', 'click', () => {
-  const searchInput = document.getElementById('search');
-  searchInput.value = '';
-  app.renderList();
-  searchInput.focus();
+addEventListenerSafe('btnRefreshData', 'click', async () => {
+  const btn = document.getElementById('btnRefreshData');
+  const icon = btn?.querySelector('i');
+  if (icon) icon.className = 'ri-loader-4-line';
+  await app.refreshData(false);
+  if (icon) icon.className = 'ri-refresh-line';
 });
 
 // Копіювання нікнейму при натисканні на ім'я автора
@@ -2606,8 +2656,6 @@ if (authorLink) {
   });
 }
 
-addEventListenerSafe('search', 'input', () => debouncedRender());
-addEventListenerSafe('catFilter', 'change', () => app.renderList());
 addEventListenerSafe('sortFilter', 'change', () => app.renderList());
 
 // Слухачі для полів цін ресурсів (реальний час)
@@ -2664,44 +2712,6 @@ addEventListenerSafe('btnSetPrice', 'click', async () => {
     }, 2000);
   }
 });
-
-// Функція для оновлення обох множників
-const updateBothQty = (qty) => {
-  const qtyNum = parseInt(qty) || 1;
-  if (qtyNum < 1 || qtyNum > 100) {
-    console.warn('Invalid qty value:', qty);
-    return;
-  }
-  
-  const qtyMult = document.getElementById('qtyMultiplier');
-  const qtyDetail = document.getElementById('recipeQty');
-  
-  if (qtyMult) qtyMult.value = qtyNum;
-  if (qtyDetail) qtyDetail.value = qtyNum;
-  
-  if (ACTIVE_ID) {
-    const recipe = DB.recipes.find(r => r.id === ACTIVE_ID);
-    if (recipe) app.updateRecipeDisplay(recipe, qtyNum);
-  }
-};
-
-// Множник для кількості (у панелі)
-const qtyMultiplierEl = document.getElementById('qtyMultiplier');
-if (qtyMultiplierEl) {
-  qtyMultiplierEl.addEventListener('change', () => {
-    const qty = parseInt(qtyMultiplierEl.value) || 1;
-    updateBothQty(qty);
-  });
-}
-
-// Множник в деталях
-const qtyDetailEl = document.getElementById('recipeQty');
-if (qtyDetailEl) {
-  qtyDetailEl.addEventListener('change', () => {
-    const qty = parseInt(qtyDetailEl.value) || 1;
-    updateBothQty(qty);
-  });
-}
 
 // Гарячі клавіші
 document.addEventListener('keydown', (e) => {
@@ -2794,7 +2804,6 @@ const editRecipe = {
     
     this.currentRecipeId = recipeId;
     document.getElementById('editRecipeName').value = recipe.name;
-    document.getElementById('editRecipeCat').value = recipe.cat;
     
     // Формувати рядки ресурсів у форматі: назва:кількість
     const resText = Object.entries(recipe.resources)
@@ -2813,7 +2822,6 @@ const editRecipe = {
   
   async save() {
     const name = document.getElementById('editRecipeName').value.trim();
-    const cat = document.getElementById('editRecipeCat').value;
     const resText = document.getElementById('editRecipeRes').value;
     
     if (!name) {
@@ -2846,7 +2854,6 @@ const editRecipe = {
     const recipe = DB.recipes.find(r => r.id === this.currentRecipeId);
     if (recipe) {
       recipe.name = name;
-      recipe.cat = cat;
       recipe.resources = resources;
       
       try {
@@ -2871,15 +2878,7 @@ const prices = {
 
   // Завантажити ціни з localStorage
   async loadPrices() {
-    const saved = localStorage.getItem('castello_prices');
-    if (saved && ENCRYPTION_PASSWORD) {
-      try {
-        const loaded = await StorageEncryption.decrypt(saved, ENCRYPTION_PASSWORD + '_prices');
-        if (loaded) Object.assign(COST_PRICES, loaded);
-      } catch (e) {
-        console.warn('Помилка завантаження цін');
-      }
-    }
+    // Дані цін беремо із сервера, щоб синхронізація була спільною для всіх.
     
     // Завантажити ціни продажу
     const savedSellPrices = localStorage.getItem('castello_sell_prices');
@@ -2995,6 +2994,10 @@ const prices = {
     const num = parseFloat(value) || 0;
     COST_PRICES[key] = num;
     await this.savePrices();
+    const serverResult = await apiClient.updatePrices(COST_PRICES);
+    if (serverResult?.success) {
+      app.setSyncStatus(serverResult.updated_at || null);
+    }
     
     // Оновити собівартість якщо зброя вибрана в меню ціна
     if (this.selectedWeaponId) {
@@ -3005,7 +3008,7 @@ const prices = {
     if (ACTIVE_ID) {
       const recipe = DB.recipes.find(x => x.id === ACTIVE_ID);
       if (recipe) {
-        app.updateRecipeDisplay(recipe, parseInt(document.getElementById('recipeQty')?.value || 1));
+        app.updateRecipeDisplay(recipe, 1);
       }
     }
   },
@@ -3048,7 +3051,7 @@ const prices = {
     
     // Використовувати ціну для ACTIVE_ID з збережених цін
     const unitSellPrice = this.weaponSellPrices[ACTIVE_ID] || 0;
-    const qty = parseInt(document.getElementById('recipeQty')?.value || 1) || 1;
+    const qty = 1;
     const totalSellPrice = unitSellPrice * qty;
     
     const dCostText = document.getElementById('dCost')?.textContent.replace('$', '') || '0';
@@ -3292,7 +3295,7 @@ const about = {
 // prices.loadPrices();
 
 // ⚠️ БЕЗПЕКА: Попередження розробникам
-console.log('%c⚠️ CASTELLO GUNS - ЗАХИЩЕНИЙ КОД', 'color: red; font-size: 16px; font-weight: bold;');
+console.log('%c⚠️ CASTELLO GUNS - ЗАХЩЕНЙ КОД', 'color: red; font-size: 16px; font-weight: bold;');
 console.log('%cДанний сайт захищений. Усі чутливі дані зберігаються на сервері і недоступні через DevTools.', 'color: orange; font-size: 12px;');
 console.log('%cПопередження: Спроби витоку даних будуть зареєстровані.', 'color: red; font-size: 12px;');
 
@@ -3310,3 +3313,4 @@ auth.init();
 setupMobileNav();
 </script>
 </body>
+
