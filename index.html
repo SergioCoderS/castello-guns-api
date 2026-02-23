@@ -49,6 +49,11 @@ body {
   50% { filter: brightness(1.05) saturate(1.1); }
 }
 
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 /* --- LAYOUT --- */
 .app-container {
   display: grid;
@@ -2174,6 +2179,7 @@ const auth = {
     const authError = document.getElementById('authError');
     const authAttempts = document.getElementById('authAttempts');
     const authPassword = document.getElementById('authPassword');
+    const authBtn = document.getElementById('authBtn');
 
     // Перевірити кількість спроб
     const now = Date.now();
@@ -2187,34 +2193,59 @@ const auth = {
       this.failedAttempts = 0;
     }
 
-    // Зварт до API для аутентифікації
-    const result = await apiClient.authenticate(input);
-    
-    if (result.success) {
-      this.isAuthenticated = true;
-      this.failedAttempts = 0;
+    // Показати loading
+    authError.style.display = 'none';
+    authError.textContent = '';
+    authBtn.disabled = true;
+    authBtn.innerHTML = '<i class="ri-loader-4-line" style="animation: spin 1s linear infinite;"></i> Завантаження...';
+    authPassword.disabled = true;
+
+    try {
+      // Таймаут 30 секунд
+      const timeout = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Таймаут: сервер не відповідає')), 30000)
+      );
+
+      // Зварт до API для аутентифікації з таймаутом
+      const authPromise = apiClient.authenticate(input);
+      const result = await Promise.race([authPromise, timeout]);
       
-      // Завантажити дані з API
-      const recipes = await apiClient.getRecipes();
-      const prices = await apiClient.getPrices();
-      
-      if (recipes && prices) {
-        DB = recipes;
-        Object.assign(COST_PRICES, prices);
+      if (result.success) {
+        this.isAuthenticated = true;
+        this.failedAttempts = 0;
         
-        this.hideAuthModal();
-        app.init();
-        app.showToast('✓ Авторизація успішна');
+        authBtn.innerHTML = '<i class="ri-loader-4-line" style="animation: spin 1s linear infinite;"></i> Завантаження даних...';
+
+        // Завантажити дані з API
+        const recipesTimeout = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Таймаут завантаження рецептів')), 30000)
+        );
+        const pricesTimeout = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Таймаут завантаження цін')), 30000)
+        );
+
+        const recipes = await Promise.race([apiClient.getRecipes(), recipesTimeout]);
+        const prices = await Promise.race([apiClient.getPrices(), pricesTimeout]);
+        
+        if (recipes && prices) {
+          DB = recipes;
+          Object.assign(COST_PRICES, prices);
+          
+          this.hideAuthModal();
+          app.init();
+          app.showToast('✓ Авторизація успішна');
+        } else {
+          throw new Error('Помилка завантаження даних');
+        }
       } else {
-        authError.textContent = '❌ Помилка завантаження даних';
-        authError.style.display = 'block';
+        throw new Error(result.error || 'Невірний пароль');
       }
-    } else {
+    } catch (error) {
       this.failedAttempts++;
       this.attemptTimestamp = now;
       const remaining = AUTH_CONFIG.MAX_ATTEMPTS - this.failedAttempts;
 
-      authError.textContent = '❌ Невірний пароль';
+      authError.textContent = `❌ ${error.message}`;
       authError.style.display = 'block';
       authPassword.value = '';
       authPassword.focus();
@@ -2222,6 +2253,10 @@ const auth = {
       if (remaining > 0) {
         authAttempts.textContent = `Залишилось спроб: ${remaining}`;
       }
+    } finally {
+      authBtn.disabled = false;
+      authBtn.innerHTML = '<i class="ri-login-box-line"></i> Вхід';
+      authPassword.disabled = false;
     }
   },
 
