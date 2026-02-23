@@ -1,0 +1,3207 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Castello Guns</title>
+<link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* --- CSS ЗМІННІ ТА БАЗА (RDR2 Style) --- */
+:root {
+  --bg-dark: #1f1f1f; 
+  --bg-panel: rgba(35, 35, 35, 0.7); 
+  --bg-light: rgba(50, 50, 50, 0.5); 
+  --primary: #c39a6b; /* Золотисто-коричневий акцент */
+  --secondary: #9a2e2e; /* Темно-червоний акцент */
+  --accent: #f5e6a3; /* Світло-жовтий текст/значення */
+  --danger: #d44e4e;
+  --success: #67a66e;
+  --text-main: #f1f5f9; 
+  --text-muted: #a0a0a0; 
+  --border: rgba(195, 154, 107, 0.3); 
+  --shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  --font-title: 'Libre Baskerville', serif; 
+}
+
+* { box-sizing: border-box; outline: none; }
+
+body {
+  margin: 0;
+  font-family: var(--font-title);
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d1f1a 50%, #1f2d2d 100%), url('https://i.imgur.com/99ezPzT.png') fixed no-repeat center center/cover; 
+  color: var(--text-main);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  text-shadow: 0 0 1px var(--bg-dark);
+  animation: backgroundShift 20s ease-in-out infinite;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@keyframes backgroundShift {
+  0%, 100% { filter: brightness(1) saturate(1); }
+  50% { filter: brightness(1.05) saturate(1.1); }
+}
+
+/* --- LAYOUT --- */
+.app-container {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  grid-template-rows: 60px 1fr;
+  height: 100%;
+  width: 100%;
+}
+
+/* --- HEADER --- */
+header {
+  grid-column: 1 / -1;
+  background: var(--bg-panel);
+  border-bottom: 2px solid var(--secondary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  box-shadow: var(--shadow);
+  z-index: 10;
+}
+
+.brand { 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    font-family: var(--font-title); 
+    font-weight: 700; 
+    font-size: 20px; 
+    color: var(--primary); 
+    text-transform: uppercase;
+}
+.brand i { 
+    font-size: 28px; 
+    color: var(--accent); 
+}
+.header-actions { 
+    display: flex; 
+    gap: 10px; 
+}
+
+/* --- PANELS --- */
+.panel {
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.panel-l { 
+    border-right: 1px solid var(--border); 
+    background: var(--bg-panel);
+    position: relative;
+}
+.panel-m { 
+    background: var(--bg-light); 
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- AUTHOR FOOTER --- */
+.author-footer {
+  background: linear-gradient(to top, rgba(0,0,0,0.4), transparent);
+  border-top: 1px solid var(--border);
+  padding: 12px 0;
+  font-size: 11px;
+  text-align: center;
+  color: var(--text-muted);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+.author-footer a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 700;
+  transition: color 0.2s;
+}
+.author-footer a:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+/* --- MOBILE NAV --- */
+@media (min-width: 769px) {
+  .mobile-nav {
+    display: none !important;
+  }
+}
+
+/* --- CONTROLS --- */
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.controls > input,
+.controls > div > input {
+  width: 100%;
+}
+.sort-group,
+.qty-group {
+  display: flex;
+  gap: 8px;
+}
+.sort-group {
+  flex-wrap: wrap;
+}
+.sort-group select {
+  flex: 1;
+  width: auto;
+  min-width: 100px;
+}
+.qty-group {
+  align-items: center;
+}
+.qty-group label {
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.qty-group input {
+  width: 60px;
+  padding: 6px;
+}
+
+/* --- CUSTOM SCROLLBAR (RDR2 Style) --- */
+.panel::-webkit-scrollbar { width: 8px; }
+.panel::-webkit-scrollbar-track { background: var(--bg-dark); }
+.panel::-webkit-scrollbar-thumb { 
+    background-color: var(--primary); 
+    border-radius: 20px; 
+    border: 2px solid var(--bg-dark); 
+}
+.panel::-webkit-scrollbar-thumb:hover { background-color: var(--accent); }
+
+/* Firefox scrollbar */
+.panel {
+  scrollbar-color: var(--primary) var(--bg-dark);
+  scrollbar-width: thin;
+}
+
+/* --- DETAIL HEADER --- */
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 15px;
+  padding-bottom: 12px;
+  background: linear-gradient(to bottom, rgba(195, 154, 107, 0.05), transparent);
+  border-radius: 6px;
+}
+.qty-display {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  background: rgba(0,0,0,0.2);
+  padding: 12px 16px;
+  border-radius: 6px;
+  border: 1px solid rgba(195, 154, 107, 0.15);
+}
+.qty-display label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.qty-display input {
+  width: 70px;
+  padding: 8px;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--primary);
+  color: var(--accent);
+  font-weight: 700;
+  text-align: center;
+}
+
+.empty-state {
+  text-align: center;
+  margin-top: 100px;
+  color: var(--text-muted);
+  font-size: 18px;
+}
+
+
+/* --- COMPONENTS --- */
+button {
+  cursor: pointer;
+  border: 1px solid var(--primary);
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  font-weight: 700;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transform: translateY(0);
+}
+
+button:active {
+  transform: translateY(2px);
+}
+
+.btn-primary { 
+    background: var(--primary); 
+    color: var(--bg-dark); 
+    border-color: var(--accent);
+    box-shadow: 0 4px 15px rgba(195, 154, 107, 0.2);
+}
+.btn-primary:hover { 
+    background: var(--accent); 
+    color: var(--bg-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(195, 154, 107, 0.4);
+}
+.btn-ghost { 
+    background: transparent; 
+    color: var(--primary); 
+    border: 1px solid var(--primary);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-ghost:hover { 
+    background: rgba(195, 154, 107, 0.15); 
+    color: var(--accent); 
+    border-color: var(--accent);
+    box-shadow: 0 0 12px rgba(195, 154, 107, 0.3);
+    transform: translateY(-1px);
+}
+.btn-icon { padding: 6px; aspect-ratio: 1; border-radius: 4px; }
+.btn-danger { 
+    background: rgba(212, 78, 78, 0.2); 
+    color: var(--danger);
+    border-color: var(--danger);
+}
+.btn-danger:hover { background: var(--danger); color: white; border-color: var(--danger); }
+
+/* Покращено контрастність вводу */
+input, select, textarea {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  padding: 10px;
+  border-radius: 4px;
+  width: 100%;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+select {
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c39a6b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 20px;
+  padding-right: 35px;
+}
+input:focus, select:focus, textarea:focus { 
+  border-color: var(--accent); 
+  background: rgba(0,0,0,0.5);
+  outline: none;
+}
+/* Стилізація плейсхолдерів */
+input::placeholder, textarea::placeholder {
+  color: rgba(195, 154, 107, 0.7); 
+  font-style: italic;
+}
+
+/* --- LIST ITEMS --- */
+.recipe-item {
+  background: rgba(0,0,0,0.1);
+  border: 1px solid rgba(0,0,0,0.1);
+  padding: 12px;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateX(0);
+}
+.recipe-item:hover { 
+    border-color: var(--primary); 
+    background: rgba(195, 154, 107, 0.08);
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(195, 154, 107, 0.15);
+}
+.recipe-item.active { 
+    border-color: var(--secondary); 
+    background: rgba(154, 46, 46, 0.3); 
+    box-shadow: 0 0 8px var(--secondary), inset 0 0 0 1px var(--secondary);
+    transform: translateX(2px);
+}
+.item-info h4 { 
+    margin: 0; font-size: 16px; 
+    font-weight: 700; 
+    color: var(--accent);
+}
+.item-info span { font-size: 12px; color: var(--text-muted); }
+
+/* --- DETAILS PANEL --- */
+#detailContent {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+#dName { 
+    color: var(--accent); 
+    font-size: 26px; 
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin: 0 0 8px 0;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+}
+/* Декоративний роздільник */
+.decorative-hr {
+  border: none;
+  height: 2px;
+  background: linear-gradient(to right, transparent, var(--secondary), transparent);
+  width: 100%;
+  margin: 16px 0;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+/* --- RESOURCES GRID --- */
+.res-grid { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
+  gap: 12px;
+}
+.res-card {
+  background: linear-gradient(135deg, rgba(195, 154, 107, 0.1) 0%, rgba(154, 46, 46, 0.05) 100%);
+  border: 1px solid rgba(195, 154, 107, 0.2);
+  padding: 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.res-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  transition: left 0.5s;
+}
+.res-card:hover {
+  border-color: var(--primary);
+  background: linear-gradient(135deg, rgba(195, 154, 107, 0.2) 0%, rgba(154, 46, 46, 0.1) 100%);
+  box-shadow: 0 4px 12px rgba(195, 154, 107, 0.2);
+  transform: translateY(-2px);
+}
+.res-card:hover::before {
+  left: 100%;
+}
+.res-card span:first-child {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.res-val { 
+  font-weight: bold; 
+  color: var(--accent);
+  font-size: 16px;
+}
+
+/* --- UTILS --- */
+.section-title { 
+    font-size: 14px; 
+    margin: 0 0 10px 0; 
+    color: var(--primary); 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+    position: relative;
+    padding-bottom: 8px;
+}
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 30px;
+  height: 2px;
+  background: linear-gradient(to right, var(--primary), transparent);
+}
+.section-title i { 
+  color: var(--secondary);
+  font-size: 18px;
+  filter: drop-shadow(0 2px 4px rgba(154, 46, 46, 0.3));
+}
+.badge { 
+    font-size: 11px; 
+    text-transform: uppercase; 
+    padding: 3px 8px; 
+    border-radius: 4px; 
+    background: var(--secondary); 
+    color: white;
+}
+.cost-display { 
+    color: var(--accent); 
+    font-size: 32px; 
+    font-weight: 900; 
+    margin: 15px 0;
+    text-align: center;
+    letter-spacing: -1px;
+    text-shadow: 0 4px 12px rgba(195, 154, 107, 0.3);
+    position: relative;
+    padding: 15px;
+    background: linear-gradient(135deg, rgba(195, 154, 107, 0.1) 0%, rgba(154, 46, 46, 0.05) 100%);
+    border: 1px solid rgba(195, 154, 107, 0.2);
+    border-radius: 8px;
+}
+
+/* --- MODAL STYLES --- */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-out;
+}
+.modal {
+    background: var(--bg-panel);
+    border: 3px double var(--primary); 
+    border-radius: 8px;
+    padding: 30px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 0 30px rgba(154, 46, 46, 0.6), 0 0 60px rgba(195, 154, 107, 0.2);
+    animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    align-items: center;
+}
+.modal-header h3 {
+    margin: 0;
+    word-wrap: break-word;
+}
+.modal-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+.modal-actions button {
+    flex: 1;
+    min-width: 80px;
+}
+.modal-actions button:last-child {
+    margin-left: auto;
+}
+.hidden { display: none !important; }
+
+/* --- TOAST --- */
+#toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--bg-panel);
+    color: var(--accent);
+    padding: 12px 20px;
+    border-radius: 6px;
+    border-left: 4px solid var(--primary);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 20px rgba(195, 154, 107, 0.2);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    transform: translateX(400px);
+}
+#toast.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+}
+#toast i { 
+    color: var(--success); 
+    font-size: 20px; 
+    animation: checkAnimation 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes checkAnimation {
+  0% { transform: scale(0.3) rotate(-45deg); }
+  70% { transform: scale(1.1); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+#toast.error {
+    border-left-color: var(--danger);
+}
+#toast.error i { 
+    color: var(--danger); 
+}
+
+
+/* --- TABLET OPTIMIZATION (769px and below) --- */
+@media (max-width: 768px) {
+  :root {
+    --font-title: 'Libre Baskerville', serif;
+  }
+  
+  .app-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: 60px 1fr;
+  }
+  
+  .panel-l { 
+    flex: 0 0 35vh; 
+    border-right: none; 
+    border-bottom: 1px solid var(--border);
+    max-height: 35vh;
+  }
+  
+  .panel-m { 
+    flex: 1;
+    overflow-y: auto;
+  }
+  
+  .detail-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .qty-display {
+    align-items: flex-start;
+    width: 100%;
+  }
+  
+  .sort-group,
+  .qty-group {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .qty-group input,
+  .qty-display input {
+    width: 100%;
+  }
+  
+  .res-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+  
+  .brand {
+    font-size: 18px;
+    gap: 8px;
+  }
+  
+  .brand i {
+    font-size: 24px;
+  }
+  
+  button {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+  
+  .btn-icon {
+    padding: 4px;
+  }
+  
+  #dName {
+    font-size: 22px;
+  }
+}
+
+/* --- MOBILE OPTIMIZATION (only phones) --- */
+@media (max-width: 640px) {
+  body {
+    height: 100vh;
+    overflow: hidden;
+  }
+  
+  .app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    grid-template-columns: none;
+    grid-template-rows: none;
+  }
+  
+  header {
+    padding: 0 10px;
+    height: 50px;
+    flex-shrink: 0;
+  }
+  
+  .panel {
+    padding: 12px;
+    gap: 10px;
+  }
+  
+  .panel-l {
+    display: none;
+  }
+  
+  .panel-l.active-tab {
+    display: flex;
+    flex: 1;
+    overflow-y: auto;
+  }
+  
+  .panel-m {
+    display: none;
+    flex: 1;
+    overflow-y: auto;
+  }
+  
+  .panel-m.active-tab {
+    display: flex;
+  }
+  
+  .mobile-nav {
+    display: flex !important;
+    gap: 0;
+    margin-bottom: 0;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 0;
+    flex-shrink: 0;
+  }
+  
+  .mobile-nav-btn {
+    flex: 1;
+    padding: 12px;
+    font-size: 12px;
+    text-align: center;
+    border: none;
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .mobile-nav-btn:active {
+    background: rgba(195, 154, 107, 0.1);
+  }
+  
+  .mobile-nav-btn.active {
+    color: var(--accent);
+    border-bottom-color: var(--primary);
+  }
+  
+  .controls {
+    gap: 6px;
+  }
+  
+  .controls > input,
+  .controls > div > input,
+  .sort-group select,
+  .qty-group input {
+    font-size: 14px;
+  }
+  
+  .brand {
+    font-size: 16px;
+    gap: 6px;
+  }
+  
+  .brand i {
+    font-size: 20px;
+  }
+  
+  button {
+    padding: 5px 8px;
+    font-size: 11px;
+    gap: 4px;
+  }
+  
+  #detailContent {
+    padding: 12px;
+  }
+  
+  #dName {
+    font-size: 20px;
+    letter-spacing: 1px;
+  }
+  
+  .section-title {
+    font-size: 12px;
+    margin-top: 12px !important;
+  }
+  
+  .section-title i {
+    font-size: 16px;
+  }
+  
+  .cost-display {
+    font-size: 24px;
+    padding: 10px;
+  }
+  
+  .res-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 8px;
+  }
+  
+  .res-card {
+    padding: 10px;
+    font-size: 12px;
+  }
+  
+  .detail-header {
+    gap: 8px;
+  }
+  
+  .qty-display {
+    padding: 8px 10px;
+  }
+  
+  .qty-display input {
+    width: 60px;
+  }
+  
+  .author-footer {
+    font-size: 10px;
+    padding: 8px 0;
+    margin-top: auto;
+  }
+  
+  #toast {
+    bottom: 10px;
+    right: 10px;
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+  
+  .modal {
+    width: 95%;
+    padding: 20px;
+    max-width: 450px;
+  }
+  
+  .modal-header h3 {
+    font-size: 14px;
+  }
+}
+
+/* Маленькі мобільні пристрої (480px і менше) */
+@media (max-width: 480px) {
+  .app-container {
+    grid-template-rows: 45px 1fr;
+  }
+  
+  header {
+    height: 45px;
+    padding: 0 8px;
+  }
+  
+  .panel {
+    padding: 8px;
+    gap: 8px;
+  }
+  
+  .panel-l {
+    flex: 0 0 28vh;
+  }
+  
+  .brand {
+    font-size: 14px;
+    gap: 4px;
+  }
+  
+  .brand i {
+    font-size: 18px;
+  }
+  
+  .header-actions {
+    gap: 6px;
+  }
+  
+  button {
+    padding: 4px 6px;
+    font-size: 10px;
+  }
+  
+  .btn-icon {
+    padding: 3px;
+  }
+  
+  .controls > input,
+  .controls > div > input,
+  input[type="number"],
+  select {
+    padding: 6px;
+    font-size: 12px;
+  }
+  
+  .item-info h4 {
+    font-size: 14px;
+  }
+  
+  .item-info span {
+    font-size: 10px;
+  }
+  
+  #dName {
+    font-size: 18px;
+  }
+  
+  .section-title {
+    font-size: 11px;
+  }
+  
+  .cost-display {
+    font-size: 20px;
+  }
+  
+  .res-card {
+    padding: 8px;
+    font-size: 11px;
+  }
+  
+  .res-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+  
+  .modal {
+    width: 98%;
+    padding: 15px;
+  }
+  
+  .modal-header h3 {
+    font-size: 12px;
+  }
+  
+  #toast {
+    width: 90%;
+    bottom: 8px;
+    right: 5%;
+    font-size: 11px;
+  }
+  
+  .mobile-nav-btn {
+    font-size: 11px;
+    padding: 10px;
+  }
+}
+
+/* --- UTILITY CLASSES --- */
+.search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.detail-title {
+  margin: 0;
+  font-size: 26px;
+}
+
+/* --- THEME TOGGLE --- */
+:root.light-theme {
+  --bg-dark: #f5f1e8;
+  --bg-panel: #ffffff;
+  --bg-light: #f9f7f3;
+  --text-main: #2c2416;
+  --text-muted: #6b5f52;
+  --border: rgba(139, 111, 71, 0.3);
+  --primary: #9d7c54;
+  --secondary: #a83232;
+  --accent: #d4a574;
+}
+:root.light-theme body {
+  background: linear-gradient(135deg, #f5f1e8 0%, #faf7f2 50%, #f0ebe1 100%);
+  color: var(--text-main);
+}
+:root.light-theme header {
+  background: linear-gradient(to bottom, #ffffff, #fffaf5);
+  border-bottom: 2px solid var(--secondary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+:root.light-theme input,
+:root.light-theme select,
+:root.light-theme textarea {
+  background: #fdfbf8;
+  color: var(--text-main);
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgba(157, 124, 84, 0.08);
+}
+:root.light-theme input:focus,
+:root.light-theme select:focus,
+:root.light-theme textarea:focus {
+  background: #ffffff;
+  border-color: var(--accent);
+  box-shadow: 0 0 8px rgba(212, 165, 116, 0.25);
+}
+:root.light-theme input::placeholder,
+:root.light-theme textarea::placeholder {
+  color: rgba(107, 95, 82, 0.6);
+}
+:root.light-theme .panel-l {
+  background: linear-gradient(to bottom, #ffffff, #fffaf5);
+  border-right: 1px solid var(--border);
+}
+:root.light-theme .panel-m {
+  background: linear-gradient(135deg, #f9f7f3 0%, #fdfbf8 100%);
+}
+:root.light-theme .recipe-item {
+  background: linear-gradient(135deg, #fdfbf8, #f9f7f3);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+:root.light-theme .recipe-item:hover {
+  border-color: var(--primary);
+  background: linear-gradient(135deg, #fffbf5, #faf7f2);
+  box-shadow: 0 2px 6px rgba(157, 124, 84, 0.12);
+}
+:root.light-theme .recipe-item.active {
+  border-color: var(--secondary);
+  background: linear-gradient(135deg, rgba(168, 50, 50, 0.08), rgba(168, 50, 50, 0.04));
+  box-shadow: 0 0 8px rgba(168, 50, 50, 0.15);
+}
+:root.light-theme .item-info h4 {
+  color: var(--primary);
+}
+:root.light-theme .item-info span {
+  color: var(--text-muted);
+}
+:root.light-theme #detailContent {
+  background: linear-gradient(135deg, #ffffff, #fffaf5);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+:root.light-theme #dName {
+  color: var(--primary);
+}
+:root.light-theme .res-card {
+  background: linear-gradient(135deg, #fdfbf8, #faf7f2);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s ease;
+}
+:root.light-theme .res-card:hover {
+  background: linear-gradient(135deg, #fffbf5, #faf7f2);
+  box-shadow: 0 2px 6px rgba(157, 124, 84, 0.12);
+}
+:root.light-theme .res-val {
+  color: var(--primary);
+}
+:root.light-theme .section-title {
+  color: var(--primary);
+  text-shadow: none;
+}
+:root.light-theme .section-title::after {
+  background: linear-gradient(to right, var(--primary), rgba(157, 124, 84, 0.3));
+}
+:root.light-theme .section-title i {
+  color: var(--secondary);
+  filter: drop-shadow(0 1px 2px rgba(168, 50, 50, 0.2));
+}
+:root.light-theme .badge {
+  background: var(--secondary);
+  color: #ffffff;
+}
+:root.light-theme .decorative-hr {
+  background-color: var(--secondary);
+}
+:root.light-theme .cost-display {
+  color: var(--primary);
+  background: linear-gradient(135deg, rgba(157, 124, 84, 0.08), rgba(212, 165, 116, 0.04));
+  border: 2px solid var(--border);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+:root.light-theme .modal {
+  background: linear-gradient(135deg, #ffffff, #fffaf5);
+  border: 3px double var(--primary);
+  box-shadow: 0 8px 32px rgba(157, 124, 84, 0.15);
+}
+:root.light-theme #toast {
+  background: linear-gradient(135deg, #ffffff, #fffaf5);
+  color: var(--primary);
+  border-left: 4px solid var(--primary);
+  box-shadow: 0 4px 12px rgba(157, 124, 84, 0.2);
+}
+:root.light-theme button {
+  border: 1px solid var(--primary);
+  color: var(--text-main);
+}
+:root.light-theme .btn-primary {
+  background: linear-gradient(135deg, var(--primary), #a8886d);
+  color: #ffffff;
+  border-color: var(--accent);
+  box-shadow: 0 2px 8px rgba(157, 124, 84, 0.2);
+}
+:root.light-theme .btn-primary:hover {
+  background: linear-gradient(135deg, var(--accent), #dab87c);
+  color: var(--text-main);
+  box-shadow: 0 4px 12px rgba(212, 165, 116, 0.3);
+  transform: translateY(-2px);
+}
+:root.light-theme .btn-ghost {
+  background: transparent;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+}
+:root.light-theme .btn-ghost:hover {
+  background: linear-gradient(135deg, rgba(157, 124, 84, 0.1), rgba(212, 165, 116, 0.05));
+  color: var(--secondary);
+  border-color: var(--secondary);
+  box-shadow: 0 2px 6px rgba(157, 124, 84, 0.15);
+}
+:root.light-theme .btn-danger {
+  background: rgba(168, 50, 50, 0.12);
+  color: var(--secondary);
+  border: 2px solid var(--secondary);
+}
+:root.light-theme .btn-danger:hover {
+  background: linear-gradient(135deg, var(--secondary), #c84141);
+  color: #ffffff;
+  border-color: var(--secondary);
+  box-shadow: 0 2px 8px rgba(168, 50, 50, 0.25);
+}
+:root.light-theme .empty-state {
+  color: var(--text-muted);
+}
+:root.light-theme .qty-display {
+  background: linear-gradient(135deg, rgba(157, 124, 84, 0.08), rgba(212, 165, 116, 0.04));
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+:root.light-theme .qty-display input {
+  background: #ffffff;
+  border: 2px solid var(--border);
+  color: var(--primary);
+}
+:root.light-theme .qty-display input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 6px rgba(212, 165, 116, 0.2);
+}
+
+/* --- AUTH MODAL STYLES --- */
+.auth-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  backdrop-filter: blur(5px);
+}
+
+.auth-modal {
+  background: var(--bg-panel);
+  border: 3px double var(--primary);
+  border-radius: 12px;
+  padding: 40px;
+  width: 90%;
+  max-width: 420px;
+  box-shadow: 0 0 50px rgba(154, 46, 46, 0.8), 0 0 100px rgba(195, 154, 107, 0.3);
+  animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: center;
+}
+
+.auth-modal h1 {
+  color: var(--primary);
+  font-size: 28px;
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+.auth-modal .subtitle {
+  color: var(--text-muted);
+  font-size: 12px;
+  margin-bottom: 30px;
+  letter-spacing: 0.5px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+#authPassword {
+  padding-right: 110px !important;
+  font-size: 16px;
+  letter-spacing: 2px;
+}
+
+.password-controls {
+  position: absolute;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.language-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  background: rgba(195, 154, 107, 0.15);
+  border: 1px solid rgba(195, 154, 107, 0.3);
+  border-radius: 4px;
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.2s;
+}
+
+.toggle-password {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(195, 154, 107, 0.15);
+  border: 1px solid rgba(195, 154, 107, 0.3);
+  border-radius: 4px;
+  color: var(--primary);
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+
+.toggle-password:hover {
+  background: rgba(195, 154, 107, 0.25);
+  border-color: var(--primary);
+  color: var(--accent);
+}
+
+.toggle-password:active {
+  transform: scale(0.95);
+}
+
+.auth-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.auth-checkbox input {
+  width: auto;
+  cursor: pointer;
+  accent-color: var(--primary);
+}
+
+#authBtn {
+  background: var(--primary);
+  color: var(--bg-dark);
+  border-color: var(--accent);
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s;
+  margin-top: 10px;
+}
+
+#authBtn:hover {
+  background: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(195, 154, 107, 0.4);
+}
+
+#authBtn:active {
+  transform: translateY(0);
+}
+
+.auth-error {
+  color: var(--danger);
+  font-size: 12px;
+  margin-top: -10px;
+  display: none;
+}
+
+.auth-attempts {
+  color: var(--text-muted);
+  font-size: 11px;
+  margin-top: 15px;
+}
+</style>
+</head>
+<body>
+
+<!-- AUTH MODAL -->
+<div id="authOverlay" class="auth-overlay">
+  <div class="auth-modal">
+    <h1>🔐Castello Guns</h1>
+    <div class="subtitle">Введіть кодове слово для доступу</div>
+    <form class="auth-form" id="authForm">
+      <div class="password-wrapper">
+        <input id="authPassword" type="password" placeholder="Кодове слово..." autocomplete="off" required>
+        <div class="password-controls">
+          <div class="language-indicator" id="langIndicator" title="Поточна мова">EN</div>
+          <button type="button" class="toggle-password" id="togglePassword" title="Показати/приховати пароль">
+            <i class="ri-eye-line"></i>
+          </button>
+        </div>
+      </div>
+      <div class="auth-error" id="authError"></div>
+      <label class="auth-checkbox" style="font-size: 14px;">
+        <input type="checkbox" id="rememberMe">
+        Запам'ятати на цьому комп'ютері
+      </label>
+      <button type="submit" id="authBtn" class="btn-primary">Вхід</button>
+      <div class="auth-attempts" id="authAttempts"></div>
+    </form>
+  </div>
+</div>
+
+<div class="app-container">
+  <header>
+    <div class="brand">
+      <i class="ri-revolver-line"></i> Castello Guns
+    </div>
+    <div class="header-actions">
+      <button class="btn-ghost btn-icon" id="btnTheme" title="Перемкнути тему"><i class="ri-sun-line"></i></button>
+      <button class="btn-ghost btn-icon" id="btnPrices" title="Управління цінами"><i class="ri-price-tag-3-line"></i></button>
+      <button class="btn-ghost btn-icon" id="btnSecurity" title="Безпека"><i class="ri-lock-line"></i></button>
+      <button class="btn-ghost btn-icon" id="btnAbout" title="Про програму"><i class="ri-information-line"></i></button>
+      <button class="btn-primary" id="btnAdmin"><i class="ri-hammer-line"></i> Адміністрування</button>
+    </div>
+  </header>
+
+  <aside class="panel panel-l">
+    <div class="controls">
+      <div style="position: relative; display: flex; align-items: center;">
+        <input id="search" placeholder="Пошук..." style="flex: 1;">
+        <button id="btnClearSearch" class="btn-ghost btn-icon" style="position: absolute; right: 4px; margin: 0;" title="Очистити пошук"><i class="ri-close-line"></i></button>
+      </div>
+      <div class="sort-group">
+        <select id="catFilter">
+          <option value="">Всі категорії</option>
+        </select>
+        <select id="sortFilter">
+          <option value="name">По назві</option>
+          <option value="price-asc">Ціна: дешевше</option>
+          <option value="price-desc">Ціна: дорожче</option>
+          <option value="category">По категорії</option>
+        </select>
+      </div>
+      <div class="qty-group">
+        <label for="qtyMultiplier">Кількість:</label>
+        <input id="qtyMultiplier" type="number" min="1" max="100" value="1">
+      </div>
+    </div>
+    <div id="recipeList" style="flex: 1;"></div>
+    <div class="mobile-nav">
+      <button class="mobile-nav-btn active" id="navList"><i class="ri-list-check-2"></i> Список</button>
+      <button class="mobile-nav-btn" id="navDetails"><i class="ri-file-list-line"></i> Деталі</button>
+    </div>
+  </aside>
+
+  <main class="panel panel-m" id="detailPanel">
+    <div id="detailContent" style="display:none">
+      <div class="detail-header">
+        <div>
+          <h2 id="dName" style="margin:0; font-size: 26px">Назва</h2>
+          <span id="dCat" class="badge">Категорія</span>
+        </div>
+        <div class="qty-display">
+          <label for="recipeQty">Кількість:</label>
+          <input id="recipeQty" type="number" min="1" max="100" value="1">
+        </div>
+      </div>
+
+      <hr class="decorative-hr">
+      
+      <h3 class="section-title"><i class="ri-hand-coin-line"></i> Собівартість предмета</h3>
+      <div id="dCost" class="cost-display">$0</div>
+      
+      <div style="margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <div>
+          <label style="color: var(--text-muted); font-size: 12px; display: block; margin-bottom: 8px;">Ваша ціна продажу</label>
+          <div id="dSellPrice" class="cost-display" style="font-size: 24px; cursor: pointer; opacity: 0.8; transition: opacity 0.2s;" title="Встав ціну в Управління цінами">$0</div>
+        </div>
+        <div>
+          <label style="color: var(--text-muted); font-size: 12px; display: block; margin-bottom: 8px;">Прибуток</label>
+          <div id="dProfit" class="cost-display" style="font-size: 24px; color: var(--success);">$0</div>
+        </div>
+      </div>
+      
+      <hr class="decorative-hr">
+      
+      <h3 class="section-title"><i class="ri-tools-line"></i> Компоненти для 1 шт.</h3>
+      <div id="dResources" class="res-grid"></div>
+
+      <h3 class="section-title" style="margin-top:25px"><i class="ri-bar-chart-box-line"></i> Потрібні злитки </h3>
+      <div id="dIngots" class="res-grid"></div>
+      
+      <h3 class="section-title" style="margin-top:25px">
+      <i class="ri-stack-line"></i> Початкова сировина
+      </h3>
+      <div id="dBase" class="res-grid"></div>
+
+    </div>
+    
+    <div id="emptyState" class="empty-state">
+      <i class="ri-book-open-line" style="font-size: 60px; opacity:0.5; color:var(--primary)"></i>
+      <p style="font-family:inherit">Оберіть предмет зі списку ліворуч</p>
+    </div>
+
+    <div class="author-footer" style="margin-top: auto;">
+      <div style="margin-bottom: 4px; cursor: pointer;" id="authorLink">🎨 <span style="color: var(--accent); font-weight: 700; transition: color 0.2s;" id="authorName">Sergio Castello</span></div>
+      <div>Forge RP 🔥</div>
+    </div>
+  </main>
+</div>
+
+<div id="pricesModal" class="modal-overlay hidden">
+  <div class="modal" style="max-width: 600px; max-height: 80vh; overflow-y: auto;">
+    <div class="modal-header">
+      <h3 class="section-title" style="margin:0"><i class="ri-price-tag-3-line"></i> Управління цінами ресурсів</h3>
+      <button class="btn-ghost btn-icon" id="btnClosePrices"><i class="ri-close-line"></i></button>
+    </div>
+    <div class="modal-content">
+      <h4 class="section-title" style="margin-top: 0;"><i class="ri-file-list-line"></i> Золото та срібло</h4>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+        <div>
+          <label style="color: var(--text-muted); font-size: 12px;">💰 Злиток золота</label>
+          <input type="number" class="price-input" data-key="Злиток золота" placeholder="Ціна в $" min="0" style="font-weight: 600;">
+        </div>
+        <div>
+          <label style="color: var(--text-muted); font-size: 12px;">💰 Злиток Срібла</label>
+          <input type="number" class="price-input" data-key="Злиток Срібла" placeholder="Ціна в $" min="0" style="font-weight: 600;">
+        </div>
+      </div>
+
+      <h4 class="section-title"><i class="ri-tools-line"></i> Основні злитки</h4>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+        <div>
+          <label style="color: var(--text-muted); font-size: 12px;">💰 Злиток сталі</label>
+          <input type="number" class="price-input" data-key="Злиток сталі" placeholder="Ціна в $" min="0" style="font-weight: 600;">
+        </div>
+        <div>
+          <label style="color: var(--text-muted); font-size: 12px;">💰 Злиток заліза</label>
+          <input type="number" class="price-input" data-key="Злиток заліза" placeholder="Ціна в $" min="0" style="font-weight: 600;">
+        </div>
+        <div>
+          <label style="color: var(--text-muted); font-size: 12px;">💰 Злиток латуні</label>
+          <input type="number" class="price-input" data-key="Злиток латуні" placeholder="Ціна в $" min="0" style="font-weight: 600;">
+        </div>
+        <div>
+          <label style="color: var(--text-muted); font-size: 12px;">💰 Злиток міді</label>
+          <input type="number" class="price-input" data-key="Злиток міді" placeholder="Ціна в $" min="0" style="font-weight: 600;">
+        </div>
+        <div>
+          <label style="color: var(--text-muted); font-size: 12px;">💰 Злиток свинцю</label>
+          <input type="number" class="price-input" data-key="Злиток свинцю" placeholder="Ціна в $" min="0" style="font-weight: 600;">
+        </div>
+        <div>
+          <label style="color: var(--text-muted); font-size: 12px;">💰 Злиток цинку</label>
+          <input type="number" class="price-input" data-key="Злиток цинку" placeholder="Ціна в $" min="0" style="font-weight: 600;">
+        </div>
+      </div>
+
+      <h4 class="section-title"><i class="ri-fire-line"></i> Сировина</h4>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+        <div>
+          <label style="color: var(--text-muted); font-size: 12px;">💰 Вугілля</label>
+          <input type="number" class="price-input" data-key="Вугілля" placeholder="Ціна в $" min="0" step="0.1" style="font-weight: 600;">
+        </div>
+        <div>
+          <label style="color: var(--text-muted); font-size: 12px;">💰 Форма з глини</label>
+          <input type="number" class="price-input" data-key="Форма з глини" placeholder="Ціна в $" min="0" style="font-weight: 600;">
+        </div>
+      </div>
+
+      <hr class="decorative-hr">
+      
+      <h4 class="section-title"><i class="ri-shopping-cart-2-line"></i> Розрахунок прибутку</h4>
+      
+      <div>
+        <label style="color: var(--text-muted); font-size: 12px;">Оберіть зброю:</label>
+        <select id="profitWeaponSelect" style="width: 100%;">
+          <option value="">-- Виберіть предмет --</option>
+        </select>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+        <div>
+          <label style="color: var(--text-muted); font-size: 12px;">Собівартість</label>
+          <div id="costValue" style="padding: 10px; background: rgba(0,0,0,0.2); border-radius: 4px; color: var(--accent); font-weight: bold; text-align: center;">$0</div>
+        </div>
+        <div>
+          <label style="color: var(--text-muted); font-size: 12px;">Ваша ціна продажу</label>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="number" id="sellPrice" placeholder="Введіть ціну продажу" min="0" style="flex: 1;">
+            <button class="btn-primary" id="btnSetPrice" style="padding: 8px 16px; font-size: 14px; white-space: nowrap;">Встановити</button>
+          </div>
+        </div>
+      </div>
+      
+      <div style="margin-top: 15px; padding: 12px; background: rgba(195, 154, 107, 0.1); border-left: 3px solid var(--primary); border-radius: 4px;">
+        <div style="font-size: 12px; color: var(--text-muted);">💰 Прибуток на одиницю:</div>
+        <div id="profitValue" style="font-size: 24px; font-weight: bold; color: var(--success); text-align: center;">$0</div>
+      </div>
+
+      <div class="modal-actions">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECURITY MODAL -->
+<div id="securityModal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="section-title" style="margin:0"><i class="ri-lock-line"></i> Безпека</h3>
+      <button class="btn-ghost btn-icon" id="btnCloseSecurity"><i class="ri-close-line"></i></button>
+    </div>
+    <div class="modal-content">
+      <h4 class="section-title"><i class="ri-logout-box-line"></i> Вихід з системи</h4>
+      <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 15px; line-height: 1.6;">Це очистить ваші дані на цьому комп'ютері та вийде з системи. Вам потрібно буде заново авторизуватися при наступному вході.</p>
+      
+      <div class="modal-actions">
+        <button class="btn-danger" id="btnLogout" style="width: 100%; font-size: 15px; padding: 12px;"><i class="ri-logout-box-line"></i> Вийти та забути</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ABOUT MODAL -->
+<div id="aboutModal" class="modal-overlay hidden">
+  <div class="modal" style="max-width: 600px; max-height: 80vh; overflow-y: auto;">
+    <div class="modal-header">
+      <h3 class="section-title" style="margin:0"><i class="ri-information-line"></i> Про програму</h3>
+      <button class="btn-ghost btn-icon" id="btnCloseAbout"><i class="ri-close-line"></i></button>
+    </div>
+    <div class="modal-content" id="aboutContent">
+      <!-- Вміст буде заповнений JS -->
+    </div>
+  </div>
+</div>
+
+<div id="adminModal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="section-title" style="margin:0">Редагування рецепту</h3>
+      <button class="btn-ghost btn-icon" id="btnCloseAdmin"><i class="ri-close-line"></i></button>
+    </div>
+    <div class="modal-content">
+      <input id="admName" placeholder="Назва предмета">
+      <select id="admCat">
+        <option value="Гвинтівка">Гвинтівка</option>
+        <option value="Дробовик">Дробовик</option>
+        <option value="Револьвер">Револьвер</option>
+        <option value="Ріпітер">Ріпітер</option>
+        <option value="Інструменти">Інструменти</option>
+        <option value="Інше">Інше</option>
+      </select>
+      <textarea id="admRes" rows="6" placeholder="Ресурси (один на рядок), напр:&#10;Дуло:1&#10;Злиток заліза:5"></textarea>
+      
+      <div class="modal-actions">
+        <button class="btn-primary" id="btnSaveAdmin">Зберегти</button>
+        <button class="btn-ghost" id="btnResetAdmin">Очистити</button>
+        <button class="btn-danger" id="btnDelete" style="display:none"><i class="ri-delete-bin-line"></i></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"><i class="ri-checkbox-circle-line"></i> <span>Message</span></div>
+
+<script>
+/* --- КОНСТАНТИ --- */
+const CONFIG = {
+  MAX_RECURSION_DEPTH: 10,
+  TOAST_DURATION: 2000,
+  STORAGE_KEY: 'castello_db',
+  THEME_STORAGE_KEY: 'castello_theme',
+  DEBOUNCE_DELAY: 300,
+  CONFIRM_DELETE: 'Видалити?'
+};
+
+/* --- ДАНІ З РЕЦЕПТАМИ ТА ЛОГІКА РОЗРАХУНКУ --- */
+const RECIPES_DATA = {
+  ingots: {
+    "Злиток заліза": {"Вугілля":5,"Залізна руда":10,"Форма з глини":1},
+    "Злиток золота": {"Вугілля":5,"Золота руда":10,"Форма з глини":1},
+    "Злиток латуні": {"Вугілля":5,"Злиток міді":1,"Злиток цинку":1,"Форма з глини":1},
+    "Злиток міді": {"Вугілля":5,"Мідна руда":10,"Форма з глини":1},
+    "Злиток свинцю": {"Вугілля":5,"Свинцева руда":10,"Форма з глини":1},
+    "Злиток Срібла": {"Вугілля":5,"Срібна руда":10,"Форма з глини":1},
+    "Злиток сталі": {"Вугілля":5,"Злиток заліза":1,"Форма з глини":1},
+    "Злиток цинку": {"Вугілля":5,"Цинкова руда":1,"Форма з глини":1},
+    "Форма з глини": {"Вугілля":5,"Глина":5}
+  },
+  parts: {
+    "Барабан": {"Злиток сталі":1},
+    "Дуло": {"Злиток сталі":1},
+    "Пружина 10шт": {"Злиток заліза":1},
+    "Шуруп 20шт": {"Злиток заліза":1},
+    "Пружина": {"Злиток заліза": 0.1}, 
+    "Шуруп": {"Злиток заліза": 0.05}, 
+    "Корпус важкої зброї": {"Злиток заліза":2,"Злиток сталі":2,"Дерево":10,"Шуруп":10},
+    "Корпус легкої зброї": {"Злиток заліза":1,"Злиток сталі":1,"Дерево":5,"Шуруп":5}
+  },
+  recipes: [
+    {id:1,name:"Ремонтний набір",cat:"Інструменти",resources:{"Злиток заліза":1,"Тканина":5,"Дерево":1,"Шуруп":5,"Пружина":2}},
+    {id:2,name:"Гвинтівка Boltaction",cat:"Гвинтівка",resources:{"Корпус важкої зброї":1,"Дуло":1,"Дерево":25,"Шуруп":10,"Пружина":3,"Злиток сталі":4}},
+    {id:3,name:"Гвинтівка Springfield",cat:"Гвинтівка",resources:{"Корпус важкої зброї":1,"Дуло":1,"Дерево":20,"Шуруп":10,"Пружина":3,"Злиток сталі":4}},
+    {id:4,name:"Дробовик Double Barrel",cat:"Дробовик",resources:{"Корпус важкої зброї":1,"Дуло":2,"Дерево":5,"Шуруп":20,"Пружина":2,"Злиток сталі":3}},
+    {id:5,name:"Дробовик Repeating",cat:"Дробовик",resources:{"Корпус важкої зброї":1,"Дуло":1,"Дерево":5,"Шуруп":15,"Пружина":2,"Злиток сталі":2}},
+    {id:6,name:"Дробовик Semi-Auto",cat:"Дробовик",resources:{"Корпус важкої зброї":1,"Дуло":1,"Дерево":5,"Шуруп":15,"Пружина":2,"Злиток сталі":2,"Злиток Срібла":2,"Злиток золота":2}},
+    {id:7,name:"Револьвер Cattleman",cat:"Револьвер",resources:{"Корпус легкої зброї":1,"Дуло":1,"Барабан":1,"Дерево":1,"Шуруп":10,"Пружина":3,"Злиток сталі":2}},
+    {id:8,name:"Револьвер Double Action",cat:"Револьвер",resources:{"Корпус легкої зброї":1,"Дуло":1,"Барабан":1,"Дерево":1,"Шуруп":10,"Пружина":3,"Злиток сталі":2}},
+    {id:9,name:"Револьвер Double Action Gambler",cat:"Револьвер",resources:{"Корпус легкої зброї":1,"Дуло":1,"Барабан":1,"Дерево":1,"Шуруп":10,"Пружина":3,"Злиток сталі":2}},
+    {id:10,name:"Револьвер Lemat",cat:"Револьвер",resources:{"Корпус легкої зброї":1,"Дуло":2,"Барабан":1,"Дерево":1,"Шуруп":10,"Пружина":4,"Злиток сталі":2}},
+    {id:11,name:"Револьвер Navy",cat:"Револьвер",resources:{"Корпус легкої зброї":1,"Дуло":1,"Барабан":1,"Дерево":1,"Шуруп":10,"Пружина":3,"Злиток сталі":3,"Злиток золота":1,"Злиток Срібла":1}},
+    {id:12,name:"Револьвер Schofield",cat:"Револьвер",resources:{"Корпус легкої зброї":1,"Дуло":1,"Барабан":1,"Дерево":1,"Шуруп":10,"Пружина":3,"Злиток сталі":2}},
+    {id:13,name:"Ріпітер Carbine",cat:"Ріпітер",resources:{"Корпус важкої зброї":1,"Дуло":1,"Дерево":5,"Шуруп":15,"Пружина":4,"Злиток сталі":3}},
+    {id:14,name:"Ріпітер Evans",cat:"Ріпітер",resources:{"Корпус важкої зброї":1,"Дуло":1,"Дерево":10,"Шуруп":15,"Пружина":4,"Злиток сталі":3}},
+    {id:15,name:"Ріпітер Lancaster",cat:"Ріпітер",resources:{"Корпус важкої зброї":1,"Дуло":2,"Дерево":5,"Шуруп":15,"Пружина":4,"Злиток сталі":3}},
+    {id:16,name:"Ріпітер Lichfield",cat:"Ріпітер",resources:{"Корпус важкої зброї":1,"Дуло":2,"Дерево":5,"Шуруп":15,"Пружина":4,"Злиток сталі":3}}
+  ]
+};
+
+// --- ОНОВЛЕНІ ЦІНИ НА БАЗОВІ РЕСУРСИ (Собівартість) ---
+const COST_PRICES = {
+    // Вхідні дані користувача
+    "Злиток золота": 200,
+    "Злиток Срібла": 200,
+    "Злиток латуні": 65,
+    "Злиток сталі": 35,
+    "Злиток заліза": 25,
+    "Злиток міді": 25,
+    "Злиток цинку": 25,
+    "Злиток свинцю": 25,
+    "Вугілля": 1.5,
+    "Дерево": 0,
+    "Глина": 0,
+    "Тканина": 0, 
+
+    // Всі руди не рахуємо (ціна 0)
+    "Залізна руда": 0, "Золота руда": 0, "Мідна руда": 0, 
+    "Свинцева руда": 0, "Срібна руда": 0, "Цинкова руда": 0,
+    
+    // Собівартість Форми: 5 Вугілля + 5 Глина = 5 * $1 + 0 = $5.
+    "Форма з глини": 5, 
+};
+
+
+let DB;
+let ENCRYPTION_PASSWORD = null;
+
+async function loadDatabase() {
+  try {
+    const encrypted = localStorage.getItem(CONFIG.STORAGE_KEY);
+    if (encrypted && ENCRYPTION_PASSWORD) {
+      const decrypted = await StorageEncryption.decrypt(encrypted, ENCRYPTION_PASSWORD);
+      if (decrypted && typeof decrypted === 'object') {
+        DB = decrypted;
+      } else {
+        console.warn('Не вдалось розшифрувати БД, використовую дані за умовленням');
+        DB = RECIPES_DATA;
+        // Очистити пошкоджені дані
+        localStorage.removeItem(CONFIG.STORAGE_KEY);
+      }
+    } else {
+      // Якщо немає зашифрованих даних, використовуємо за умовленням
+      DB = RECIPES_DATA;
+    }
+  } catch (e) {
+    console.error('Критична помилка при завантаженні БД:', e);
+    DB = RECIPES_DATA;
+    // Очистити пошкоджені дані
+    localStorage.removeItem(CONFIG.STORAGE_KEY);
+  }
+}
+
+async function saveDatabase() {
+  try {
+    if (ENCRYPTION_PASSWORD) {
+      if (!DB || typeof DB !== 'object') {
+        console.error('Невалідні дані БД для збереження');
+        return;
+      }
+      const encrypted = await StorageEncryption.encrypt(DB, ENCRYPTION_PASSWORD);
+      if (encrypted) {
+        localStorage.setItem(CONFIG.STORAGE_KEY, encrypted);
+      } else {
+        console.error('Не вдалось зашифрувати БД');
+      }
+    }
+  } catch (e) {
+    console.error('Критична помилка при збереженні БД:', e);
+  }
+}
+let ACTIVE_ID = null;
+let DEBOUNCE_TIMER = null;
+let HISTORY = []; // Для undo/redo
+let HISTORY_INDEX = -1;
+
+// --- AUTHENTICATION CONFIG ---
+const AUTH_CONFIG = {
+  DEFAULT_PASSWORD: 'castellllo',
+  STORAGE_PASSWORD_HASH_KEY: 'castello_auth_hash',
+  STORAGE_SESSION_KEY: 'castello_auth_session',
+  STORAGE_ATTEMPTS_KEY: 'castello_auth_attempts',
+  MAX_ATTEMPTS: 5,
+  ATTEMPT_RESET_TIME: 900000 // 15 minutes
+};
+
+// --- VERSION INFO ---
+const VERSION_INFO = {
+  version: '2.0.0',
+  releaseDate: '20.02.2026',
+  author: 'SERGO',
+  changelog: [
+    {
+      version: '2.0.0',
+      date: '20.02.2026',
+      changes: [
+        '🔐 Додано шифрування бази даних AES-GCM 256-bit',
+        '🔒 Пароль тепер зберігається як SHA-256 хеш',
+        '💾 Зашифровані ціни та дані про продажі',
+        '🛡️ Безпечне керування сеансами з sessionStorage',
+        '✅ Розширена валідація даних та обробка помилок',
+        '🐛 Виправлені потенційні race conditions',
+        '📝 Поліпшена обробка асинхронних операцій'
+      ]
+    },
+    {
+      version: '1.5.0',
+      date: '19.02.2026',
+      changes: [
+        '🔐 Додано базову систему аутентифікації',
+        '🎨 Red Dead Redemption 2 тематичний дизайн',
+        '📱 Мобільна адаптивність',
+        '🌓 Режим темної/світлої теми'
+      ]
+    },
+    {
+      version: '1.0.0',
+      date: '15.02.2026',
+      changes: [
+        '🚀 Перший реліз',
+        '📋 Управління рецептами та ресурсами',
+        '💰 Розрахунок вартості виробництва',
+        '🔧 Адміністраторський панель'
+      ]
+    }
+  ]
+};
+
+// --- PASSWORD HASHING HELPER ---
+const PasswordHasher = {
+  async hashPassword(password) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  },
+
+  async verifyPassword(password, hash) {
+    const computed = await this.hashPassword(password);
+    return computed === hash;
+  }
+};
+
+// --- ENCRYPTION HELPER FOR DATABASE ---
+const StorageEncryption = {
+  // Фіксована сіль для консистентного шифрування
+  FIXED_SALT: new Uint8Array([99, 97, 115, 116, 101, 108, 108, 111, 115, 97, 108, 116, 50, 48, 50, 54]),
+  
+  async deriveKey(password) {
+    try {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(password);
+      const keyMaterial = await crypto.subtle.importKey(
+        'raw',
+        data,
+        { name: 'PBKDF2' },
+        false,
+        ['deriveKey']
+      );
+      return await crypto.subtle.deriveKey(
+        {
+          name: 'PBKDF2',
+          salt: this.FIXED_SALT,
+          iterations: 100000,
+          hash: 'SHA-256'
+        },
+        keyMaterial,
+        { name: 'AES-GCM', length: 256 },
+        false,
+        ['encrypt', 'decrypt']
+      );
+    } catch (e) {
+      console.error('Помилка при генеруванні ключа:', e);
+      return null;
+    }
+  },
+
+  async encrypt(data, password) {
+    try {
+      if (!password) {
+        console.warn('Пароль не встановлено для шифрування');
+        return null;
+      }
+      const key = await this.deriveKey(password);
+      if (!key) {
+        console.error('Не вдалось згенерувати ключ для шифрування');
+        return null;
+      }
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const encoder = new TextEncoder();
+      const encrypted = await crypto.subtle.encrypt(
+        { name: 'AES-GCM', iv },
+        key,
+        encoder.encode(JSON.stringify(data))
+      );
+      const combined = new Uint8Array(iv.length + encrypted.byteLength);
+      combined.set(iv, 0);
+      combined.set(new Uint8Array(encrypted), iv.length);
+      return btoa(String.fromCharCode.apply(null, combined));
+    } catch (e) {
+      console.error('Помилка при шифруванні:', e);
+      return null;
+    }
+  },
+
+  async decrypt(encryptedData, password) {
+    try {
+      if (!password || !encryptedData) {
+        console.warn('Відсутній пароль або зашифровані дані');
+        return null;
+      }
+      const key = await this.deriveKey(password);
+      if (!key) {
+        console.error('Не вдалось згенерувати ключ для розшифрування');
+        return null;
+      }
+      
+      let binary;
+      try {
+        binary = atob(encryptedData);
+      } catch (e) {
+        console.error('Помилка декодування Base64:', e);
+        return null;
+      }
+      
+      if (binary.length < 12) {
+        console.error('Зашифровані дані занадто короткі', binary.length);
+        return null;
+      }
+      
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      const iv = bytes.slice(0, 12);
+      const encrypted = bytes.slice(12);
+      
+      const decrypted = await crypto.subtle.decrypt(
+        { name: 'AES-GCM', iv },
+        key,
+        encrypted
+      );
+      const decoder = new TextDecoder();
+      const result = JSON.parse(decoder.decode(decrypted));
+      return result || null;
+    } catch (e) {
+      console.error('Помилка при розшифруванні:', e.message);
+      return null;
+    }
+  }
+};
+
+// --- UTILITY FUNCTIONS ---
+const utils = {
+  debounce(fn, delay) {
+    return (...args) => {
+      clearTimeout(DEBOUNCE_TIMER);
+      DEBOUNCE_TIMER = setTimeout(() => fn(...args), delay);
+    };
+  },
+
+  saveToHistory() {
+    HISTORY = HISTORY.slice(0, HISTORY_INDEX + 1);
+    HISTORY.push(JSON.parse(JSON.stringify(DB)));
+    HISTORY_INDEX++;
+    if (HISTORY.length > 50) {
+      HISTORY.shift();
+      HISTORY_INDEX--;
+    }
+  },
+
+  undo() {
+    if (HISTORY_INDEX > 0) {
+      HISTORY_INDEX--;
+      DB = JSON.parse(JSON.stringify(HISTORY[HISTORY_INDEX]));
+      // saveDatabase() виконується без await (асинхронно на фоні)
+      saveDatabase();
+      app.renderList();
+      if (ACTIVE_ID) app.select(ACTIVE_ID);
+      app.showToast('↶ Скасовано');
+    }
+  },
+
+  redo() {
+    if (HISTORY_INDEX < HISTORY.length - 1) {
+      HISTORY_INDEX++;
+      DB = JSON.parse(JSON.stringify(HISTORY[HISTORY_INDEX]));
+      // saveDatabase() виконується без await (асинхронно на фоні)
+      saveDatabase();
+      app.renderList();
+      if (ACTIVE_ID) app.select(ACTIVE_ID);
+      app.showToast('↷ Повторено');
+    }
+  },
+
+  validateResourcesText(text) {
+    const lines = text.trim().split('\n').filter(Boolean);
+    const resources = {};
+    const errors = [];
+
+    lines.forEach((line, i) => {
+      const parts = line.split(':');
+      if (parts.length < 2) {
+        errors.push(`Рядок ${i + 1}: потрібен формат "Назва: кількість"`);
+        return;
+      }
+      const k = parts[0].trim();
+      const v = parts.slice(1).join(':').trim(); // Дозволяємо `:` в значеннях
+      const qty = parseFloat(v);
+      if (!k || isNaN(qty) || qty <= 0) {
+        errors.push(`Рядок ${i + 1}: помилка`);
+      } else {
+        resources[k] = qty;
+      }
+    });
+
+    return { resources, errors };
+  },
+
+  search(array, query, fn) {
+    if (!query) return array;
+    return array.filter(item => fn(item, query));
+  },
+
+  sort(array, field) {
+    const copy = [...array];
+
+    switch (field) {
+      case 'price-asc':
+        return copy.sort((a, b) =>
+          calc.calculateCost(a.resources) -
+          calc.calculateCost(b.resources)
+        );
+
+      case 'price-desc':
+        return copy.sort((a, b) =>
+          calc.calculateCost(b.resources) -
+          calc.calculateCost(a.resources)
+        );
+
+      case 'category':
+        return copy.sort((a, b) => a.cat.localeCompare(b.cat, 'uk'));
+
+      default:
+        return copy.sort((a, b) => a.name.localeCompare(b.name, 'uk'));
+    }
+  }
+};
+
+
+const calc = {
+  add(target, key, qty) {
+    target[key] = (target[key] || 0) + qty;
+  },
+
+  collectIngots(resources, result, mult = 1, depth = 0, visited = new Set()) {
+    if (depth > CONFIG.MAX_RECURSION_DEPTH) return;
+    if (!resources || typeof resources !== 'object') return;
+
+    for (const [key, qty] of Object.entries(resources)) {
+      // Перевірка циклічних залежностей
+      if (visited.has(key)) continue;
+      
+      const total = qty * mult;
+
+      // 🧱 PART — розкладаємо далі
+      if (DB.parts && DB.parts[key]) {
+        visited.add(key);
+        this.collectIngots(DB.parts[key], result, total, depth + 1, visited);
+        visited.delete(key);
+        continue;
+      }
+
+      // 🔒 ЗЛИТОК — додаємо
+      if (DB.ingots && DB.ingots[key] && COST_PRICES[key] > 0) {
+        this.add(result, key, total);
+      }
+    }
+  },
+
+  collectBaseResources(resources, result, mult = 1, depth = 0, visited = new Set()) {
+    if (depth > CONFIG.MAX_RECURSION_DEPTH) return;
+    if (!resources || typeof resources !== 'object') return;
+
+    for (const [key, qty] of Object.entries(resources)) {
+      // Перевірка циклічних залежностей
+      if (visited.has(key)) continue;
+      
+      const total = qty * mult;
+
+      // 🧱 PART
+      if (DB.parts && DB.parts[key]) {
+        visited.add(key);
+        this.collectBaseResources(DB.parts[key], result, total, depth + 1, visited);
+        visited.delete(key);
+        continue;
+      }
+
+      // 🔩 ЗЛИТОК → розкладаємо в сировину
+      if (DB.ingots && DB.ingots[key]) {
+        visited.add(key);
+        this.collectBaseResources(DB.ingots[key], result, total, depth + 1, visited);
+        visited.delete(key);
+        continue;
+      }
+
+      // 🪵 БАЗОВА СИРОВИНА
+      result[key] = (result[key] || 0) + total;
+    }
+  },
+
+
+  calculateCost(resources) {
+    const ingots = {};
+    this.collectIngots(resources, ingots, 1, 0, new Set());
+
+    let sum = 0;
+    for (const [k, v] of Object.entries(ingots)) {
+      const rounded = Math.ceil(v);
+      const price = COST_PRICES[k] || 0;
+      sum += rounded * price;
+    }
+
+    return Math.max(0, sum);
+  }
+};
+
+
+
+
+/* --- AUTHENTICATION CONTROLLER --- */
+const auth = {
+  isAuthenticated: false,
+  failedAttempts: 0,
+  attemptTimestamp: 0,
+  defaultPasswordHash: null,
+
+  async init() {
+    // Ініціалізувати хеш по умовчанню
+    this.defaultPasswordHash = await PasswordHasher.hashPassword(AUTH_CONFIG.DEFAULT_PASSWORD);
+    
+    // Перевірити чи є активна сесія
+    const session = localStorage.getItem(AUTH_CONFIG.STORAGE_SESSION_KEY);
+    if (session) {
+      this.isAuthenticated = true;
+      // Перевірити чи є збережений пароль в сесії
+      const sessionPassword = sessionStorage.getItem('_session_pwd') || localStorage.getItem('_session_pwd');
+      if (sessionPassword) {
+        ENCRYPTION_PASSWORD = sessionPassword;
+      } else {
+        // Якщо пароль не знайдено, використовуємо стандартний
+        ENCRYPTION_PASSWORD = AUTH_CONFIG.DEFAULT_PASSWORD;
+      }
+      await loadDatabase();
+      this.hideAuthModal();
+      app.init();
+    } else {
+      this.setupAuthEvents();
+    }
+  },
+
+  setupAuthEvents() {
+    const authForm = document.getElementById('authForm');
+    const authPassword = document.getElementById('authPassword');
+    const togglePassword = document.getElementById('togglePassword');
+    const authBtn = document.getElementById('authBtn');
+
+    if (authForm) {
+      authForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        this.authenticate(authPassword.value);
+      });
+    }
+
+    if (togglePassword) {
+      togglePassword.addEventListener('click', (e) => {
+        e.preventDefault();
+        const icon = togglePassword.querySelector('i');
+        const isPassword = authPassword.type === 'password';
+        authPassword.type = isPassword ? 'text' : 'password';
+        icon.className = isPassword ? 'ri-eye-off-line' : 'ri-eye-line';
+      });
+    }
+
+    // Детекція мови при введені
+    if (authPassword) {
+      authPassword.addEventListener('input', () => {
+        this.detectLanguage(authPassword.value);
+      });
+      
+      authPassword.addEventListener('keydown', (e) => {
+        // Детекція при натисканні клавіші
+        setTimeout(() => {
+          this.detectLanguage(authPassword.value);
+        }, 10);
+      });
+      
+      authPassword.focus();
+    }
+  },
+
+  detectLanguage(text) {
+    if (!text || text.length === 0) {
+      document.getElementById('langIndicator').textContent = 'EN';
+      return;
+    }
+
+    const lastChar = text.charAt(text.length - 1);
+    const langIndicator = document.getElementById('langIndicator');
+    
+    // Перевіряємо остатний введений символ
+    const cyrillicRegex = /[а-яіїєґА-ЯІЇЄҐ]/;
+    const latinRegex = /[a-zA-Z]/;
+    const numberRegex = /[0-9]/;
+    
+    if (cyrillicRegex.test(lastChar)) {
+      langIndicator.textContent = 'УКР';
+      langIndicator.title = 'Українська мова';
+    } else if (latinRegex.test(lastChar)) {
+      langIndicator.textContent = 'ENG';
+      langIndicator.title = 'English language';
+    } else if (numberRegex.test(lastChar)) {
+      langIndicator.textContent = 'NUM';
+      langIndicator.title = 'Numbers and symbols';
+    } else {
+      langIndicator.textContent = '123';
+      langIndicator.title = 'Special characters';
+    }
+  },
+
+  async authenticate(input) {
+    const storedHash = localStorage.getItem(AUTH_CONFIG.STORAGE_PASSWORD_HASH_KEY);
+    const correctHash = storedHash || this.defaultPasswordHash;
+    const rememberMe = document.getElementById('rememberMe')?.checked;
+    const authError = document.getElementById('authError');
+    const authAttempts = document.getElementById('authAttempts');
+    const authPassword = document.getElementById('authPassword');
+
+    // Перевірити кількість спроб
+    const now = Date.now();
+    if (this.attemptTimestamp && now - this.attemptTimestamp < AUTH_CONFIG.ATTEMPT_RESET_TIME) {
+      if (this.failedAttempts >= AUTH_CONFIG.MAX_ATTEMPTS) {
+        authError.textContent = '❌ Забагато спроб. Спробуйте пізніше.';
+        authError.style.display = 'block';
+        return;
+      }
+    } else {
+      this.failedAttempts = 0;
+    }
+
+    // Перевірити пароль
+    const isCorrect = await PasswordHasher.verifyPassword(input, correctHash);
+    if (isCorrect) {
+      this.isAuthenticated = true;
+      this.failedAttempts = 0;
+      
+      // Встановити пароль для шифрування БД
+      ENCRYPTION_PASSWORD = input;
+      await loadDatabase();
+
+      // Встановити сесію
+      if (rememberMe) {
+        const sessionToken = 'session_' + Date.now();
+        localStorage.setItem(AUTH_CONFIG.STORAGE_SESSION_KEY, sessionToken);
+        // Зберегти пароль у localStorage для відновлення сесії
+        localStorage.setItem('_session_pwd', input);
+      } else {
+        sessionStorage.setItem(AUTH_CONFIG.STORAGE_SESSION_KEY, 'temporary');
+        // Зберегти пароль у sessionStorage для відновлення сесії
+        sessionStorage.setItem('_session_pwd', input);
+      }
+
+      this.hideAuthModal();
+      app.init();
+      app.showToast('✓ Авторизація успішна');
+    } else {
+      this.failedAttempts++;
+      this.attemptTimestamp = now;
+      const remaining = AUTH_CONFIG.MAX_ATTEMPTS - this.failedAttempts;
+
+      authError.textContent = '❌ Невірне кодове слово';
+      authError.style.display = 'block';
+      authPassword.value = '';
+      authPassword.focus();
+
+      if (remaining > 0) {
+        authAttempts.textContent = `Залишилось спроб: ${remaining}`;
+      }
+    }
+  },
+
+  hideAuthModal() {
+    const authOverlay = document.getElementById('authOverlay');
+    if (authOverlay) {
+      authOverlay.style.display = 'none';
+    }
+  },
+
+  logout() {
+    localStorage.removeItem(AUTH_CONFIG.STORAGE_SESSION_KEY);
+    localStorage.removeItem('_session_pwd');
+    sessionStorage.removeItem(AUTH_CONFIG.STORAGE_SESSION_KEY);
+    sessionStorage.removeItem('_session_pwd');
+    this.isAuthenticated = false;
+    location.reload();
+  }
+};
+
+/* --- APP CONTROLLER --- */
+const app = {
+  init() {
+    // Перевірити що DB визначена і має необхідні властивості
+    if (!DB || !DB.recipes || !Array.isArray(DB.recipes)) {
+      console.error('БД не завантажена правильно');
+      DB = RECIPES_DATA;
+    }
+    app.renderCats();
+    app.renderList();
+    utils.saveToHistory();
+  },
+
+
+  renderCats() {
+    const catIcons = {
+      'Гвинтівка': '🔫',
+      'Дробовик': '💣',
+      'Револьвер': '🔪',
+      'Ріпітер': '⚡',
+      'Інструменти': '🔨',
+      'Інше': '📦'
+    };
+    const cats = [...new Set(DB.recipes.map(r => r.cat))]
+      .sort((a, b) => a.localeCompare(b, 'uk'));
+
+    document.getElementById('catFilter').innerHTML =
+      '<option value="">Всі категорії</option>' +
+      cats.map(c => `<option value="${c}">${catIcons[c] || '•'} ${c}</option>`).join('');
+  },
+
+  renderList() {
+    const q = document.getElementById('search').value.toLowerCase();
+    const cat = document.getElementById('catFilter').value;
+    const sortBy = document.getElementById('sortFilter').value || 'name';
+
+    let filtered = DB.recipes.filter(r => {
+      const catMatch = !cat || r.cat === cat;
+      const nameMatch = !q || r.name.toLowerCase().includes(q);
+      return catMatch && nameMatch;
+    });
+
+    filtered = utils.sort(filtered, sortBy);
+
+    const list = document.getElementById('recipeList');
+    if (!list) return;
+
+    list.innerHTML = filtered.map(r => `
+      <div class="recipe-item ${ACTIVE_ID === r.id ? 'active' : ''}" data-id="${r.id}">
+        <div class="item-info">
+          <h4>${r.name}</h4>
+          <span>${r.cat}</span>
+        </div>
+      </div>
+    `).join('');
+
+    list.querySelectorAll('.recipe-item[data-id]').forEach(el => {
+      el.addEventListener('click', () => this.select(+el.dataset.id));
+    });
+  },
+
+  select(id) {
+    ACTIVE_ID = id;
+    this.renderList();
+
+    const r = DB.recipes.find(x => x.id === id);
+    if (!r) return;
+
+    document.getElementById('emptyState')?.classList.add('hidden');
+    document.getElementById('detailContent').style.display = 'block';
+
+    document.getElementById('dName').textContent = r.name;
+    document.getElementById('dCat').textContent = r.cat;
+    document.getElementById('recipeQty').value = 1;
+
+    this.updateRecipeDisplay(r, 1);
+    
+    // Синхронізувати вибір у меню ціна
+    const profitWeaponSelect = document.getElementById('profitWeaponSelect');
+    if (profitWeaponSelect) {
+      profitWeaponSelect.value = id;
+      // Також викличемо selectWeapon щоб завантажилася збережена ціна
+      prices.selectWeapon(id);
+    }
+  },
+
+  updateRecipeDisplay(recipe, qty) {
+    if (!recipe) return;
+
+    const qtyNum = parseInt(qty) || 1;
+
+    // Компоненти
+    const dResources = document.getElementById('dResources');
+    if (dResources) {
+      dResources.innerHTML = Object.entries(recipe.resources).map(([k, v]) => `
+        <div class="res-card">
+          <span>${k}</span>
+          <span class="res-val">${(v * qtyNum).toFixed(2)}</span>
+        </div>
+      `).join('');
+    }
+
+  
+    // 🔢 Розрахунок
+const combinedRes = {};
+for (const [k, v] of Object.entries(recipe.resources)) {
+  combinedRes[k] = v * qtyNum;
+}
+
+// 🔩 Злитки (і для ціни, і для UI)
+const ingotTotals = {};
+calc.collectIngots(combinedRes, ingotTotals);
+
+// 🪨 БАЗОВА СИРОВИНА
+const baseTotals = {};
+calc.collectBaseResources(combinedRes, baseTotals);
+
+// 🔩 UI: злитки
+const dIngots = document.getElementById('dIngots');
+if (dIngots) {
+  dIngots.innerHTML = Object.entries(ingotTotals)
+    .sort()
+    .map(([k, v]) => `
+      <div class="res-card">
+        <span>${k}</span>
+        <span class="res-val">${Math.ceil(v)}</span>
+      </div>
+    `)
+    .join('');
+}
+const dBase = document.getElementById('dBase');
+if (dBase) {
+  dBase.innerHTML = Object.entries(baseTotals)
+    .sort((a, b) => a[0].localeCompare(b[0], 'uk'))
+    .map(([k, v]) => `
+      <div class="res-card">
+        <span>${k}</span>
+        <span class="res-val">${Math.ceil(v)}</span>
+      </div>
+    `)
+    .join('') || '<div class="muted">Немає даних</div>';
+}
+
+
+
+    // Собівартість
+    document.getElementById('dCost').textContent = `$${calc.calculateCost(combinedRes).toFixed(2)}`;
+
+    // Оновити прибуток на головній панелі якщо є ціна продажу
+    prices.updateMainPanelProfit();
+
+    // Admin sync
+    if (!document.getElementById('adminModal')?.classList.contains('hidden')) {
+      admin.load(ACTIVE_ID);
+    }
+  },
+
+  toggleAdmin() {
+    const modal = document.getElementById('adminModal');
+    if (!modal) return;
+    const isHidden = modal.classList.contains('hidden');
+    if (isHidden) {
+      admin.reset();
+      if (ACTIVE_ID) {
+        admin.load(ACTIVE_ID);
+      }
+      modal.classList.remove('hidden');
+    } else {
+      modal.classList.add('hidden');
+    }
+  },
+
+  toggleTheme() {
+    const html = document.documentElement;
+    const isLight = html.classList.toggle('light-theme');
+    localStorage.setItem(CONFIG.THEME_STORAGE_KEY, isLight ? 'light' : 'dark');
+    const icon = document.getElementById('btnTheme')?.querySelector('i');
+    if (icon) {
+      icon.className = isLight ? 'ri-moon-line' : 'ri-sun-line';
+    }
+  },
+
+  saveDB() {
+    saveDatabase();
+    app.renderList();
+    app.renderCats();
+  },
+
+  showToast(message, isError = false) {
+    const toast = document.getElementById('toast');
+    if (!toast) return;
+    const icon = toast.querySelector('i');
+    const span = toast.querySelector('span');
+    if (span) span.textContent = message;
+    toast.classList.toggle('error', isError);
+    if (icon) {
+      icon.className = isError ? 'ri-error-warning-line' : 'ri-checkbox-circle-line';
+    }
+    toast.classList.add('show');
+    clearTimeout(toast._hideTimer);
+    toast._hideTimer = setTimeout(() => {
+      toast.classList.remove('show');
+    }, CONFIG.TOAST_DURATION);
+  }
+};
+
+/* --- ADMIN --- */
+const admin = {
+  load(id) {
+    const r = DB.recipes.find(x => x.id === id);
+    if(!r) return;
+    document.getElementById('admName').value = r.name;
+    document.getElementById('admCat').value = r.cat;
+    document.getElementById('admRes').value = Object.entries(r.resources).map(([k,v]) => `${k}:${v}`).join('\n');
+    document.getElementById('btnDelete').style.display = 'inline-block';
+  },
+  
+  reset() {
+    document.getElementById('admName').value = '';
+    document.getElementById('admCat').value = 'Інше';
+    document.getElementById('admRes').value = '';
+    document.getElementById('btnDelete').style.display = 'none';
+  },
+  
+  save() {
+    const name = document.getElementById('admName').value?.trim();
+    const cat = document.getElementById('admCat').value;
+    const resText = document.getElementById('admRes').value;
+    
+    if(!name) {
+      app.showToast('Вкажіть назву', true);
+      return;
+    }
+    
+    const { resources, errors } = utils.validateResourcesText(resText);
+    
+    if (errors.length > 0) {
+      app.showToast(errors[0], true);
+      return;
+    }
+
+    if(Object.keys(resources).length === 0) {
+      app.showToast('Додайте хоча б один ресурс', true);
+      return;
+    }
+
+    const isEditing = ACTIVE_ID && document.getElementById('btnDelete').style.display !== 'none';
+    let r = isEditing ? DB.recipes.find(x => x.id === ACTIVE_ID) : null;
+
+    if(r) {
+      r.name = name; 
+      r.cat = cat; 
+      r.resources = resources;
+      app.showToast('✓ Оновлено');
+    } else {
+      const newId = Date.now();
+      DB.recipes.push({ id: newId, name, cat, resources });
+      app.showToast('✓ Створено');
+    }
+    
+    app.saveDB();
+    app.toggleAdmin();
+  },
+  
+  del() {
+    if(confirm(CONFIG.CONFIRM_DELETE)) {
+      const deletedId = ACTIVE_ID;
+      DB.recipes = DB.recipes.filter(x => x.id !== deletedId);
+      ACTIVE_ID = null;
+      app.saveDB();
+      app.toggleAdmin();
+      document.getElementById('detailContent').style.display = 'none';
+      document.getElementById('emptyState').classList.remove('hidden');
+      app.showToast('✓ Видалено');
+    }
+  }
+};
+
+/* --- INIT --- */
+// Завантажити збережену тему
+const savedTheme = localStorage.getItem(CONFIG.THEME_STORAGE_KEY);
+if (savedTheme === 'light') {
+  document.documentElement.classList.add('light-theme');
+  const btnTheme = document.getElementById('btnTheme');
+  if (btnTheme) {
+    const icon = btnTheme.querySelector('i');
+    if (icon) icon.className = 'ri-moon-line';
+  }
+}
+
+const debouncedRender = utils.debounce(() => app.renderList(), CONFIG.DEBOUNCE_DELAY);
+
+// Безпечне додавання слухачів з перевіркою
+const addEventListenerSafe = (id, event, handler) => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener(event, handler);
+  } else {
+    console.warn(`Element ${id} not found`);
+  }
+};
+
+addEventListenerSafe('btnAdmin', 'click', () => app.toggleAdmin());
+addEventListenerSafe('btnCloseAdmin', 'click', () => app.toggleAdmin());
+addEventListenerSafe('btnPrices', 'click', () => prices.show());
+addEventListenerSafe('btnClosePrices', 'click', () => prices.hide());
+addEventListenerSafe('btnSecurity', 'click', () => security.show());
+addEventListenerSafe('btnCloseSecurity', 'click', () => security.hide());
+addEventListenerSafe('btnAbout', 'click', () => about.show());
+addEventListenerSafe('btnCloseAbout', 'click', () => about.hide());
+addEventListenerSafe('btnLogout', 'click', () => {
+  if (confirm('Ви впевнені, що хочете вийти?')) {
+    auth.logout();
+  }
+});
+addEventListenerSafe('btnTheme', 'click', () => app.toggleTheme());
+addEventListenerSafe('btnSaveAdmin', 'click', () => admin.save());
+addEventListenerSafe('btnResetAdmin', 'click', () => admin.reset());
+addEventListenerSafe('btnDelete', 'click', () => admin.del());
+addEventListenerSafe('btnClearSearch', 'click', () => {
+  const searchInput = document.getElementById('search');
+  searchInput.value = '';
+  app.renderList();
+  searchInput.focus();
+});
+
+// Копіювання нікнейму при натисканні на ім'я автора
+const authorLink = document.getElementById('authorLink');
+if (authorLink) {
+  authorLink.addEventListener('click', () => {
+    const username = 'sergio_rec';
+    navigator.clipboard.writeText(username).then(() => {
+      app.showToast(`✓ Скопійовано: ${username}`);
+    }).catch(() => {
+      app.showToast('Помилка копіювання', true);
+    });
+  });
+  
+  // Зміна курсору при наведенні
+  authorLink.addEventListener('mouseover', () => {
+    document.getElementById('authorName').style.color = 'var(--primary)';
+  });
+  authorLink.addEventListener('mouseout', () => {
+    document.getElementById('authorName').style.color = 'var(--accent)';
+  });
+}
+
+addEventListenerSafe('search', 'input', () => debouncedRender());
+addEventListenerSafe('catFilter', 'change', () => app.renderList());
+addEventListenerSafe('sortFilter', 'change', () => app.renderList());
+
+// Слухачі для полів цін ресурсів (реальний час)
+document.addEventListener('input', async (e) => {
+  if (e.target.classList.contains('price-input')) {
+    const key = e.target.dataset.key;
+    await prices.updatePrice(key, e.target.value);
+  }
+});
+
+// Слухач для вибору зброї в меню управління цінами
+addEventListenerSafe('profitWeaponSelect', 'change', (e) => {
+  const selectedId = parseInt(e.target.value);
+  if (selectedId) {
+    prices.selectWeapon(selectedId);
+  } else {
+    prices.selectedWeaponId = null;
+    document.getElementById('costValue').textContent = '$0';
+    document.getElementById('sellPrice').value = '';
+    document.getElementById('profitValue').textContent = '$0';
+  }
+});
+
+// Слухач для ціни продажу (real-time оновлення при введенні)
+addEventListenerSafe('sellPrice', 'input', async (e) => {
+  await prices.updateSellPrice(e.target.value);
+});
+
+// Слухач для кнопки "Встановити ціну"
+addEventListenerSafe('btnSetPrice', 'click', async () => {
+  const sellPriceEl = document.getElementById('sellPrice');
+  const sellPrice = parseFloat(sellPriceEl?.value) || 0;
+  
+  if (sellPrice > 0) {
+    await prices.updateSellPrice(sellPrice);
+    // Показати повідомлення про успіх
+    const btn = document.getElementById('btnSetPrice');
+    const originalText = btn.textContent;
+    btn.textContent = '✓ Встановлено!';
+    btn.style.background = 'var(--success)';
+    setTimeout(() => {
+      btn.textContent = originalText;
+      btn.style.background = '';
+    }, 2000);
+  } else {
+    // Показати помилку
+    const btn = document.getElementById('btnSetPrice');
+    const originalText = btn.textContent;
+    btn.textContent = '⚠ Введіть ціну!';
+    btn.style.background = 'var(--danger)';
+    setTimeout(() => {
+      btn.textContent = originalText;
+      btn.style.background = '';
+    }, 2000);
+  }
+});
+
+// Функція для оновлення обох множників
+const updateBothQty = (qty) => {
+  const qtyNum = parseInt(qty) || 1;
+  if (qtyNum < 1 || qtyNum > 100) {
+    console.warn('Invalid qty value:', qty);
+    return;
+  }
+  
+  const qtyMult = document.getElementById('qtyMultiplier');
+  const qtyDetail = document.getElementById('recipeQty');
+  
+  if (qtyMult) qtyMult.value = qtyNum;
+  if (qtyDetail) qtyDetail.value = qtyNum;
+  
+  if (ACTIVE_ID) {
+    const recipe = DB.recipes.find(r => r.id === ACTIVE_ID);
+    if (recipe) app.updateRecipeDisplay(recipe, qtyNum);
+  }
+};
+
+// Множник для кількості (у панелі)
+const qtyMultiplierEl = document.getElementById('qtyMultiplier');
+if (qtyMultiplierEl) {
+  qtyMultiplierEl.addEventListener('change', () => {
+    const qty = parseInt(qtyMultiplierEl.value) || 1;
+    updateBothQty(qty);
+  });
+}
+
+// Множник в деталях
+const qtyDetailEl = document.getElementById('recipeQty');
+if (qtyDetailEl) {
+  qtyDetailEl.addEventListener('change', () => {
+    const qty = parseInt(qtyDetailEl.value) || 1;
+    updateBothQty(qty);
+  });
+}
+
+// Гарячі клавіші
+document.addEventListener('keydown', (e) => {
+  if (e.ctrlKey || e.metaKey) {
+    if (e.key === 'z') {
+      e.preventDefault();
+      if (e.shiftKey) utils.redo();
+      else utils.undo();
+    }
+  }
+});
+
+/* Оптимізація для touch-пристроїв */
+const isTouchDevice = () => {
+  return (('ontouchstart' in window) ||
+          (navigator.maxTouchPoints > 0) ||
+          (navigator.msMaxTouchPoints > 0));
+};
+
+if (isTouchDevice()) {
+  document.documentElement.style.fontSize = '16px';
+  const style = document.createElement('style');
+  style.textContent = `
+    button:active { 
+      background: var(--accent) !important;
+      transform: scale(0.98) !important;
+    }
+    .recipe-item:active {
+      background: rgba(154, 46, 46, 0.4) !important;
+      transform: scale(0.98) !important;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+/* Мобільна навігація (перемикання між списком і деталями) */
+const setupMobileNav = () => {
+  if (window.innerWidth > 768) return;
+  
+  const mobileNav = document.querySelector('.mobile-nav');
+  const panelL = document.querySelector('.panel-l');
+  const panelM = document.querySelector('.panel-m');
+  const navList = document.getElementById('navList');
+  const navDetails = document.getElementById('navDetails');
+  
+  if (!mobileNav || !panelL || !panelM || !navList || !navDetails) return;
+  
+  const switchToList = () => {
+    panelL.classList.add('active-tab');
+    panelM.classList.remove('active-tab');
+    navList.classList.add('active');
+    navDetails.classList.remove('active');
+  };
+  
+  const switchToDetails = () => {
+    panelL.classList.remove('active-tab');
+    panelM.classList.add('active-tab');
+    navList.classList.remove('active');
+    navDetails.classList.add('active');
+  };
+  
+  navList.addEventListener('click', switchToList);
+  navDetails.addEventListener('click', switchToDetails);
+  
+  // При виборі рецепту автоматично перейти на деталі
+  if (!app.__selectWrapped) {
+  const originalSelect = app.select;
+
+  app.select = function(id) {
+    originalSelect.call(this, id);
+    if (window.innerWidth <= 768) {
+      setTimeout(switchToDetails, 50);
+    }
+  };
+
+  app.__selectWrapped = true;
+}
+  
+  // По замовченню показуємо список
+  switchToList();
+};
+
+/* --- PRICES CONTROLLER --- */
+const prices = {
+  // Зберігання цін продажу для кожної зброї
+  weaponSellPrices: {},
+
+  // Завантажити ціни з localStorage
+  async loadPrices() {
+    const saved = localStorage.getItem('castello_prices');
+    if (saved && ENCRYPTION_PASSWORD) {
+      try {
+        const loaded = await StorageEncryption.decrypt(saved, ENCRYPTION_PASSWORD + '_prices');
+        if (loaded) Object.assign(COST_PRICES, loaded);
+      } catch (e) {
+        console.warn('Помилка завантаження цін');
+      }
+    }
+    
+    // Завантажити ціни продажу
+    const savedSellPrices = localStorage.getItem('castello_sell_prices');
+    if (savedSellPrices && ENCRYPTION_PASSWORD) {
+      try {
+        const loaded = await StorageEncryption.decrypt(savedSellPrices, ENCRYPTION_PASSWORD + '_sell');
+        if (loaded) this.weaponSellPrices = loaded;
+      } catch (e) {
+        console.warn('Помилка завантаження цін продажу');
+      }
+    }
+    
+    // Завантажити останнє вибране оружие
+    const lastSelectedId = localStorage.getItem('castello_last_weapon');
+    if (lastSelectedId) {
+      this.lastSelectedWeaponId = parseInt(lastSelectedId);
+    }
+  },
+
+  // Зберегти ціни в localStorage (зашифровані)
+  async savePrices() {
+    if (ENCRYPTION_PASSWORD) {
+      if (!COST_PRICES || typeof COST_PRICES !== 'object') {
+        console.error('Невалідні дані цін для збереження');
+        return;
+      }
+      try {
+        const encrypted = await StorageEncryption.encrypt(COST_PRICES, ENCRYPTION_PASSWORD + '_prices');
+        if (encrypted) {
+          localStorage.setItem('castello_prices', encrypted);
+          console.log('✓ Ціни збережені');
+        } else {
+          console.error('Не вдалось зашифрувати ціни');
+        }
+      } catch (e) {
+        console.error('Помилка при збереженні цін:', e);
+      }
+    }
+  },
+
+  // Зберегти ціни продажу (зашифровані)
+  async saveSellPrices() {
+    if (ENCRYPTION_PASSWORD) {
+      if (!this.weaponSellPrices || typeof this.weaponSellPrices !== 'object') {
+        console.error('Невалідні дані цін продажу');
+        return;
+      }
+      try {
+        const encrypted = await StorageEncryption.encrypt(this.weaponSellPrices, ENCRYPTION_PASSWORD + '_sell');
+        if (encrypted) {
+          localStorage.setItem('castello_sell_prices', encrypted);
+          console.log('✓ Ціни продажу збережені');
+        } else {
+          console.error('Не вдалось зашифрувати ціни продажу');
+        }
+      } catch (e) {
+        console.error('Помилка при збереженні цін продажу:', e);
+      }
+    }
+  },
+
+  // Зберегти останнє вибране оружие
+  saveLastWeapon() {
+    if (this.selectedWeaponId) {
+      localStorage.setItem('castello_last_weapon', this.selectedWeaponId.toString());
+    }
+  },
+
+  // Показати модаль з цінами
+  async show() {
+    await this.loadPrices();
+    this.renderWeaponSelect();
+    this.render();
+    // Відновити останнє вибране оружие
+    if (this.lastSelectedWeaponId) {
+      const select = document.getElementById('profitWeaponSelect');
+      if (select) {
+        select.value = this.lastSelectedWeaponId;
+        this.selectWeapon(this.lastSelectedWeaponId);
+      }
+    }
+    document.getElementById('pricesModal').classList.remove('hidden');
+  },
+
+  // Закрити модаль
+  hide() {
+    document.getElementById('pricesModal').classList.add('hidden');
+  },
+
+  // Відновити стандартні ціни
+  async reset() {
+    const defaults = {
+      "Злиток золота": 200,
+      "Злиток Срібла": 200,
+      "Злиток латуні": 65,
+      "Злиток сталі": 35,
+      "Злиток заліза": 25,
+      "Злиток міді": 25,
+      "Злиток цинку": 25,
+      "Злиток свинцю": 25,
+      "Вугілля": 1.5,
+      "Форма з глини": 5,
+    };
+    Object.assign(COST_PRICES, defaults);
+    await this.savePrices();
+    this.render();
+    if (ACTIVE_ID) app.select(ACTIVE_ID);
+    app.showToast('✓ Цени відновлено');
+  },
+
+  // Оновити цену ресурсу в реальному часі
+  async updatePrice(key, value) {
+    const num = parseFloat(value) || 0;
+    COST_PRICES[key] = num;
+    await this.savePrices();
+    
+    // Оновити собівартість якщо зброя вибрана в меню ціна
+    if (this.selectedWeaponId) {
+      this.updateCostDisplay();
+    }
+    
+    // Оновити також для головної панелі
+    if (ACTIVE_ID) {
+      const recipe = DB.recipes.find(x => x.id === ACTIVE_ID);
+      if (recipe) {
+        app.updateRecipeDisplay(recipe, parseInt(document.getElementById('recipeQty')?.value || 1));
+      }
+    }
+  },
+
+  // Оновити ціну продажу
+  async updateSellPrice(value) {
+    const sellPrice = parseFloat(value) || 0;
+    
+    // Зберегти ціну для цієї зброї
+    if (this.selectedWeaponId) {
+      if (sellPrice > 0) {
+        this.weaponSellPrices[this.selectedWeaponId] = sellPrice;
+      } else {
+        delete this.weaponSellPrices[this.selectedWeaponId];
+      }
+      await this.saveSellPrices();
+    }
+    
+    // Оновити прибуток в меню
+    this.updateProfitDisplay(sellPrice);
+    
+    // Оновити прибуток на головній панелі якщо ця зброя є активною
+    if (ACTIVE_ID === this.selectedWeaponId) {
+      this.updateMainPanelProfit();
+    }
+  },
+
+  // Оновити прибуток на головній панелі
+  updateMainPanelProfit() {
+    const dSellPrice = document.getElementById('dSellPrice');
+    const dProfit = document.getElementById('dProfit');
+    const sellPriceEl = document.getElementById('sellPrice');
+    
+    if (!dSellPrice || !dProfit || !ACTIVE_ID) {
+      if (dSellPrice) dSellPrice.textContent = '$0';
+      if (dProfit) dProfit.textContent = '$0';
+      if (dProfit) dProfit.style.color = 'var(--success)';
+      return;
+    }
+    
+    // Використовувати ціну для ACTIVE_ID з збережених цін
+    const unitSellPrice = this.weaponSellPrices[ACTIVE_ID] || 0;
+    const qty = parseInt(document.getElementById('recipeQty')?.value || 1) || 1;
+    const totalSellPrice = unitSellPrice * qty;
+    
+    const dCostText = document.getElementById('dCost')?.textContent.replace('$', '') || '0';
+    const totalCost = parseFloat(dCostText) || 0;
+    const profit = totalSellPrice - totalCost;
+    
+    dSellPrice.textContent = `$${totalSellPrice.toFixed(2)}`;
+    dProfit.textContent = `$${profit.toFixed(2)}`;
+    dProfit.style.color = profit >= 0 ? 'var(--success)' : 'var(--danger)';
+  },
+
+  // Оновити відображення прибутку
+  updateProfitDisplay(sellPrice) {
+    const costEl = document.getElementById('costValue');
+    const profitEl = document.getElementById('profitValue');
+    
+    if (!costEl || !profitEl) return;
+    
+    const costText = costEl.textContent.replace('$', '');
+    const cost = parseFloat(costText) || 0;
+    const profit = sellPrice - cost;
+    
+    profitEl.textContent = `$${profit.toFixed(2)}`;
+    profitEl.style.color = profit >= 0 ? 'var(--success)' : 'var(--danger)';
+  },
+
+  // Перемалювати форму з цінами
+  render() {
+    const inputs = document.querySelectorAll('.price-input');
+    inputs.forEach(input => {
+      const key = input.dataset.key;
+      input.value = COST_PRICES[key] || 0;
+    });
+    
+    // Оновити собівартість для вибраного предмета
+    if (this.selectedWeaponId) {
+      this.updateCostDisplay();
+    }
+  },
+
+  // Наповнити select з зброєю
+  renderWeaponSelect() {
+    const select = document.getElementById('profitWeaponSelect');
+    if (!select) return;
+    
+    select.innerHTML = '<option value="">-- Виберіть предмет --</option>' +
+      DB.recipes
+        .sort((a, b) => a.name.localeCompare(b.name, 'uk'))
+        .map(r => `<option value="${r.id}">${r.name}</option>`)
+        .join('');
+  },
+
+  // Обрати зброю для розрахунку прибутку
+  selectWeapon(recipeId) {
+    this.selectedWeaponId = recipeId;
+    this.saveLastWeapon();
+    
+    // Завантажити збережену ціну продажу для цієї зброї
+    const sellPriceEl = document.getElementById('sellPrice');
+    const savedPrice = this.weaponSellPrices[recipeId] || '';
+    if (sellPriceEl) {
+      sellPriceEl.value = savedPrice;
+      // Оновити прибуток відразу після встановлення ціни
+      this.updateProfitDisplay(parseFloat(savedPrice) || 0);
+    }
+    
+    this.updateCostDisplay();
+  },
+
+  // Оновити відображення собівартості для обраної зброї (переписана для незалежності від ACTIVE_ID)
+  updateCostDisplay() {
+    const costEl = document.getElementById('costValue');
+    const sellPriceEl = document.getElementById('sellPrice');
+    
+    if (!this.selectedWeaponId || !costEl) {
+      if (costEl) costEl.textContent = '$0';
+      return;
+    }
+    
+    const recipe = DB.recipes.find(x => x.id === this.selectedWeaponId);
+    if (!recipe) return;
+    
+    const cost = calc.calculateCost(recipe.resources);
+    costEl.textContent = `$${cost.toFixed(2)}`;
+    
+    // НЕ очищуємо sellPrice - зберігаємо введену ціну!
+    // Оновлюємо прибуток якщо ціна вже введена
+    if (sellPriceEl && sellPriceEl.value) {
+      const sellPrice = parseFloat(sellPriceEl.value) || 0;
+      this.updateProfitDisplay(sellPrice);
+    } else {
+      document.getElementById('profitValue').textContent = '$0';
+    }
+  }
+};
+
+/* --- SECURITY CONTROLLER --- */
+const security = {
+  show() {
+    const modal = document.getElementById('securityModal');
+    if (!modal) return;
+    
+    // Оновити поточний пароль (повністю замаскований для безпеки)
+    const storedHash = localStorage.getItem(AUTH_CONFIG.STORAGE_PASSWORD_HASH_KEY);
+    if (storedHash) {
+      document.getElementById('currentPassword').value = '••••••••';
+    }
+    
+    modal.classList.remove('hidden');
+  },
+
+  hide() {
+    const modal = document.getElementById('securityModal');
+    if (modal) modal.classList.add('hidden');
+    
+    // Очистити форму
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmPassword').value = '';
+    document.getElementById('securityError').style.display = 'none';
+  },
+
+  async changePassword() {
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const securityError = document.getElementById('securityError');
+
+    // Валідація
+    if (newPassword.length < 4) {
+      securityError.textContent = '⚠️ Пароль повинен мати мінімум 4 символи';
+      securityError.style.display = 'block';
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      securityError.textContent = '⚠️ Паролі не збігаються';
+      securityError.style.display = 'block';
+      return;
+    }
+
+    // Зберегти хеш нового пароля
+    const hash = await PasswordHasher.hashPassword(newPassword);
+    localStorage.setItem(AUTH_CONFIG.STORAGE_PASSWORD_HASH_KEY, hash);
+    securityError.style.display = 'none';
+    
+    app.showToast('✓ Пароль змінено успішно');
+    
+    // Очистити форму через 1 сек та закрити
+    setTimeout(() => {
+      this.hide();
+    }, 1000);
+  },
+
+  resetPassword() {
+    if (confirm('Встановити стандартний пароль (castello123)?')) {
+      localStorage.removeItem(AUTH_CONFIG.STORAGE_PASSWORD_HASH_KEY);
+      app.showToast('✓ Пароль скинуто на стандартний');
+      this.hide();
+    }
+  }
+};
+
+/* --- ABOUT CONTROLLER --- */
+const about = {
+  show() {
+    const modal = document.getElementById('aboutModal');
+    if (!modal) return;
+    this.renderContent();
+    modal.classList.remove('hidden');
+  },
+
+  hide() {
+    const modal = document.getElementById('aboutModal');
+    if (modal) modal.classList.add('hidden');
+  },
+
+  renderContent() {
+    const content = document.getElementById('aboutContent');
+    if (!content) return;
+
+    let html = `
+      <div style="text-align: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid rgba(195, 154, 107, 0.2);">
+        <h2 style="color: var(--accent); margin: 0 0 8px 0; font-size: 28px;">
+          <i class="ri-revolver-line" style="color: var(--secondary)"></i> Castello Guns
+        </h2>
+        <p style="color: var(--primary); font-size: 16px; margin: 0 0 8px 0;">Версія ${VERSION_INFO.version}</p>
+        <p style="color: var(--text-muted); font-size: 12px; margin: 0;">Дата релізу: ${VERSION_INFO.releaseDate}</p>
+        <p style="color: var(--text-muted); font-size: 11px; margin: 5px 0 0 0;">Автор: ${VERSION_INFO.author}</p>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <h4 class="section-title" style="margin-bottom: 12px;"><i class="ri-git-commit-line"></i> Історія оновлень</h4>
+    `;
+
+    VERSION_INFO.changelog.forEach((release, index) => {
+      html += `
+        <div style="margin-bottom: 16px; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 6px; border-left: 3px solid var(--primary);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <strong style="color: var(--accent);">v${release.version}</strong>
+            <span style="color: var(--text-muted); font-size: 11px;">${release.date}</span>
+          </div>
+          <ul style="margin: 0; padding-left: 16px; color: var(--text-main); font-size: 12px;">
+      `;
+      
+      release.changes.forEach(change => {
+        html += `<li style="margin-bottom: 4px;">${change}</li>`;
+      });
+
+      html += `
+          </ul>
+        </div>
+      `;
+    });
+
+    html += `
+      </div>
+
+      <div style="padding-top: 15px; border-top: 1px solid rgba(195, 154, 107, 0.2); margin-top: 15px;">
+        <h4 class="section-title" style="margin-bottom: 12px;"><i class="ri-shield-check-line"></i> Безпека</h4>
+        <div style="font-size: 12px; color: var(--text-main); line-height: 1.6;">
+          <p style="margin: 0 0 8px 0;"><strong>🔐 Шифрування:</strong></p>
+          <p style="margin: 0 0 8px 0; padding-left: 12px; color: var(--text-muted);">
+            • База даних: AES-GCM 256-bit<br>
+            • Пароль: SHA-256 хеш<br>
+            • Ключ: PBKDF2 з 100,000 ітераціями
+          </p>
+          <p style="margin: 0 0 8px 0;"><strong>🛡️ Дані:</strong></p>
+          <p style="margin: 0 0 8px 0; padding-left: 12px; color: var(--text-muted);">
+            • Усі дані зберігаються зашифровані<br>
+            • DevTools не показує чутливої інформації<br>
+            • Безпечне керування сеансами
+          </p>
+        </div>
+      </div>
+    `;
+
+    content.innerHTML = html;
+  }
+};
+
+// Завантажити збережені ціни при старті (буде зроблено після авторизації)
+// prices.loadPrices();
+
+// Ініціалізація аутентифікації
+auth.init();
+setupMobileNav();
+</script>
+</body>
