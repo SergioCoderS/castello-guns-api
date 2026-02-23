@@ -5,11 +5,20 @@ from flask import Flask, jsonify, request, send_from_directory, redirect
 from flask_cors import CORS
 import hashlib
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 
 app = Flask(__name__)
-CORS(app)
+
+def get_cors_origins():
+    raw_origins = os.environ.get('CORS_ORIGINS', '').strip()
+    if raw_origins:
+        return [origin.strip() for origin in raw_origins.split(',') if origin.strip()]
+    if os.environ.get('FLASK_ENV') == 'development':
+        return '*'
+    return ['https://castello-guns-api.onrender.com']
+
+CORS(app, resources={r"/api/*": {"origins": get_cors_origins()}})
 
 # ============================================
 # ЗАВАНТАЖЕННЯ ДАНИХ З JSON
@@ -42,8 +51,12 @@ DATA = load_data()
 DATA_UPDATED_AT = datetime.now().isoformat()
 
 # Безпека та аутентифікація
-DEFAULT_PASSWORD = "castellllo"
+DEFAULT_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'castellllo')
+TOKEN_TTL_SECONDS = int(os.environ.get('TOKEN_TTL_SECONDS', '86400'))
 AUTH_TOKENS = {}
+
+if os.environ.get('FLASK_ENV') == 'production' and DEFAULT_PASSWORD == 'castellllo':
+    print("WARNING: ADMIN_PASSWORD is not set. Using insecure default password in production.")
 
 # Безпека: примусити HTTPS
 @app.before_request
@@ -69,8 +82,27 @@ def set_security_headers(response):
 # ============================================
 
 def verify_token(token):
-    """Перевірити чи токен валідний"""
-    return token in AUTH_TOKENS
+    """???????????????????? ???? ?????????? ????????????????"""
+    token_data = AUTH_TOKENS.get(token)
+    if not token_data:
+        return False
+
+    created_raw = token_data.get("created")
+    if not created_raw:
+        AUTH_TOKENS.pop(token, None)
+        return False
+
+    try:
+        created_at = datetime.fromisoformat(created_raw)
+    except ValueError:
+        AUTH_TOKENS.pop(token, None)
+        return False
+
+    if datetime.utcnow() - created_at > timedelta(seconds=TOKEN_TTL_SECONDS):
+        AUTH_TOKENS.pop(token, None)
+        return False
+
+    return True
 
 # ============================================
 # API РОУТИ
@@ -79,12 +111,12 @@ def verify_token(token):
 @app.route('/api/auth', methods=['POST'])
 def authenticate():
     """Аутентифікація користувача"""
-    data = request.get_json()
+    data = request.get_json(silent=True) or {}
     password = data.get('password', '')
     
     if password == DEFAULT_PASSWORD:
-        token = hashlib.sha256(f"{password}{datetime.now()}".encode()).hexdigest()
-        AUTH_TOKENS[token] = {"created": datetime.now().isoformat()}
+        token = hashlib.sha256(f"{password}{datetime.utcnow()}".encode()).hexdigest()
+        AUTH_TOKENS[token] = {"created": datetime.utcnow().isoformat()}
         return jsonify({"success": True, "token": token})
     
     return jsonify({"success": False, "error": "Невірний пароль"}), 401

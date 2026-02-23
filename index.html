@@ -95,6 +95,13 @@ header {
     align-items: center;
     gap: 10px; 
 }
+.price-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  white-space: nowrap;
+}
 .sync-status {
   font-size: 11px;
   color: var(--text-muted);
@@ -886,6 +893,10 @@ input::placeholder, textarea::placeholder {
     gap: 6px;
   }
   
+  .price-btn .price-btn-label {
+    display: none;
+  }
+  
   button {
     padding: 4px 6px;
     font-size: 10px;
@@ -1342,10 +1353,13 @@ input::placeholder, textarea::placeholder {
       <i class="ri-revolver-line"></i> Castello Guns
     </div>
     <div class="header-actions">
+      <button class="btn-primary price-btn" id="btnPrices" title="Управління цінами">
+        <i class="ri-price-tag-3-line"></i>
+        <span class="price-btn-label">Управління цінами</span>
+      </button>
       <span id="syncStatus" class="sync-status">Синхронізація: --</span>
       <button class="btn-ghost btn-icon" id="btnRefreshData" title="Оновити дані"><i class="ri-refresh-line"></i></button>
       <button class="btn-ghost btn-icon" id="btnTheme" title="Перемкнути тему"><i class="ri-sun-line"></i></button>
-      <button class="btn-ghost btn-icon" id="btnPrices" title="Управління цінами"><i class="ri-price-tag-3-line"></i></button>
       <button class="btn-ghost btn-icon" id="btnSecurity" title="Безпека"><i class="ri-lock-line"></i></button>
       <button class="btn-ghost btn-icon" id="btnAbout" title="Про програму"><i class="ri-information-line"></i></button>
     </div>
